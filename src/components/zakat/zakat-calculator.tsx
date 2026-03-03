@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useI18n } from "@/lib/i18n";
@@ -41,6 +41,49 @@ import {
   TriangleAlert,
 } from "lucide-react";
 
+// ─── LocalStorage keys ───────────────────────────────────────────────────────
+
+const STORAGE_KEY_INPUT = "zakat-input";
+const STORAGE_KEY_TAB = "zakat-active-tab";
+
+function loadInputFromStorage(lang: "en" | "bn"): ZakatInput {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_INPUT);
+    if (saved) {
+      const parsed = JSON.parse(saved) as ZakatInput;
+      // Basic validation: check that required top-level keys exist
+      if (
+        parsed &&
+        parsed.cash &&
+        parsed.gold &&
+        parsed.silver &&
+        parsed.investments &&
+        parsed.others &&
+        parsed.liabilities &&
+        typeof parsed.goldPricePerGram === "number" &&
+        typeof parsed.silverPricePerGram === "number"
+      ) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Corrupted or missing data – fall through to default
+  }
+  return createDefaultInput(lang);
+}
+
+function loadTabFromStorage(): string {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_TAB);
+    if (saved && ["cash", "gold", "silver", "investments", "others", "liabilities"].includes(saved)) {
+      return saved;
+    }
+  } catch {
+    // ignore
+  }
+  return "cash";
+}
+
 // ─── Tab definitions ─────────────────────────────────────────────────────────
 
 const ASSET_TABS = [
@@ -70,9 +113,26 @@ export function ZakatCalculator() {
   const { t, lang, toggleLanguage } = useI18n();
   const { isDark, toggleTheme } = useTheme();
 
-  // ─── State ───────────────────────────────────────────────────────────────
-  const [input, setInput] = useState<ZakatInput>(() => createDefaultInput(lang));
-  const [activeTab, setActiveTab] = useState("cash");
+  // ─── State (hydrated from localStorage) ──────────────────────────────────
+  const [input, setInput] = useState<ZakatInput>(() => loadInputFromStorage(lang));
+  const [activeTab, setActiveTab] = useState(() => loadTabFromStorage());
+
+  // ─── Persist state to localStorage ───────────────────────────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_INPUT, JSON.stringify(input));
+    } catch {
+      // Storage full or unavailable – silently ignore
+    }
+  }, [input]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_TAB, activeTab);
+    } catch {
+      // ignore
+    }
+  }, [activeTab]);
 
   // ─── Derived result (memoized) ───────────────────────────────────────────
   const result: ZakatResult = useMemo(() => calculateZakat(input), [input]);
@@ -121,8 +181,15 @@ export function ZakatCalculator() {
   );
 
   const handleReset = useCallback(() => {
-    setInput(createDefaultInput(lang));
+    const defaults = createDefaultInput(lang);
+    setInput(defaults);
     setActiveTab("cash");
+    try {
+      localStorage.removeItem(STORAGE_KEY_INPUT);
+      localStorage.removeItem(STORAGE_KEY_TAB);
+    } catch {
+      // ignore
+    }
   }, [lang]);
 
   // ─── Render ──────────────────────────────────────────────────────────────
