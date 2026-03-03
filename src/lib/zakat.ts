@@ -17,6 +17,10 @@ export const DEFAULT_SILVER_PRICE_PER_GRAM = 615; // BDT per gram
 // Zakat rate
 export const ZAKAT_RATE = 0.025; // 2.5%
 
+// Default making charge rate (Bangladesh standard ~17%)
+// Deducted from nisab threshold since jewelry resale value is lower than market gold/silver price
+export const DEFAULT_MAKING_CHARGE_RATE = 0.17; // 17%
+
 // ─── Entry Types ─────────────────────────────────────────────────────────────
 
 /**
@@ -96,6 +100,8 @@ export interface ZakatInput {
   goldPricePerGram: number;
   silverPricePerGram: number;
   nisabMethod: "gold" | "silver";
+  /** Making charge rate (0–1). Deducted from nisab threshold. Default 0.17 (17%) */
+  makingChargeRate: number;
 }
 
 // ─── Result Types ────────────────────────────────────────────────────────────
@@ -119,6 +125,7 @@ export interface ZakatResult {
   nisabGold: number;
   nisabSilver: number;
   nisabMethod: "gold" | "silver";
+  makingChargeRate: number;
   isZakatApplicable: boolean;
   zakatPayable: number;
   /** Accumulated zakat on loans given (amount × 2.5% × years for each loan) */
@@ -313,6 +320,7 @@ export function createDefaultInput(lang: "en" | "bn" = "en"): ZakatInput {
     goldPricePerGram: DEFAULT_GOLD_PRICE_PER_GRAM,
     silverPricePerGram: DEFAULT_SILVER_PRICE_PER_GRAM,
     nisabMethod: "silver",
+    makingChargeRate: DEFAULT_MAKING_CHARGE_RATE,
   };
 }
 
@@ -352,11 +360,19 @@ export function sumMetalEntries(entries: MetalEntry[], pricePerGram: number): nu
 
 export function calculateNisab(
   goldPricePerGram: number,
-  silverPricePerGram: number
+  silverPricePerGram: number,
+  makingChargeRate: number = DEFAULT_MAKING_CHARGE_RATE
 ): { gold: number; silver: number } {
+  const rate = Math.max(0, Math.min(1, safeNum(makingChargeRate)));
+  const goldNisabRaw = GOLD_NISAB_GRAMS * safeNum(goldPricePerGram);
+  const silverNisabRaw = SILVER_NISAB_GRAMS * safeNum(silverPricePerGram);
+
+  // Deduct making charge from nisab threshold
+  // In Bangladesh, gold/silver jewelry carries a making charge (~17% default),
+  // so the actual resale value is lower than market price
   return {
-    gold: GOLD_NISAB_GRAMS * safeNum(goldPricePerGram),
-    silver: SILVER_NISAB_GRAMS * safeNum(silverPricePerGram),
+    gold: goldNisabRaw * (1 - rate),
+    silver: silverNisabRaw * (1 - rate),
   };
 }
 
@@ -365,6 +381,7 @@ export function calculateNisab(
 export function calculateZakat(input: ZakatInput): ZakatResult {
   const goldPrice = safeNum(input.goldPricePerGram) || DEFAULT_GOLD_PRICE_PER_GRAM;
   const silverPrice = safeNum(input.silverPricePerGram) || DEFAULT_SILVER_PRICE_PER_GRAM;
+  const makingChargeRate = safeNum(input.makingChargeRate ?? DEFAULT_MAKING_CHARGE_RATE);
 
   const cashTotal = sumEntries(input.cash.entries);
   const goldTotal = sumMetalEntries(input.gold.entries, goldPrice);
@@ -378,7 +395,7 @@ export function calculateZakat(input: ZakatInput): ZakatResult {
   const totalAssets = cashTotal + goldTotal + silverTotal + investmentTotal + othersTotal + loansGivenTotal;
   const netAssets = Math.max(0, totalAssets - liabilitiesTotal);
 
-  const nisab = calculateNisab(goldPrice, silverPrice);
+  const nisab = calculateNisab(goldPrice, silverPrice, makingChargeRate);
   const nisabThreshold = input.nisabMethod === "gold" ? nisab.gold : nisab.silver;
 
   const isZakatApplicable = netAssets >= nisabThreshold;
@@ -451,6 +468,7 @@ export function calculateZakat(input: ZakatInput): ZakatResult {
     nisabGold: nisab.gold,
     nisabSilver: nisab.silver,
     nisabMethod: input.nisabMethod,
+    makingChargeRate,
     isZakatApplicable,
     zakatPayable,
     loanZakat,
@@ -546,6 +564,7 @@ interface CompactInput {
   gp: number;                 // goldPricePerGram
   sp: number;                 // silverPricePerGram
   nm: "g" | "s";             // nisabMethod
+  mc?: number;               // makingChargeRate (optional for backward compat)
 }
 
 /**
@@ -578,6 +597,7 @@ export function encodeZakatInput(input: ZakatInput): string {
     gp: input.goldPricePerGram,
     sp: input.silverPricePerGram,
     nm: input.nisabMethod === "gold" ? "g" : "s",
+    mc: input.makingChargeRate,
   };
 
   const json = JSON.stringify(compact);
@@ -635,6 +655,7 @@ export function decodeZakatInput(encoded: string): ZakatInput | null {
       goldPricePerGram: safeNum(compact.gp) || DEFAULT_GOLD_PRICE_PER_GRAM,
       silverPricePerGram: safeNum(compact.sp) || DEFAULT_SILVER_PRICE_PER_GRAM,
       nisabMethod: compact.nm === "g" ? "gold" : "silver",
+      makingChargeRate: compact.mc != null ? safeNum(compact.mc) : DEFAULT_MAKING_CHARGE_RATE,
     };
   } catch {
     return null;

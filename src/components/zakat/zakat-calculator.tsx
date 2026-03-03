@@ -10,6 +10,7 @@ import {
   createDefaultLoansGiven,
   encodeZakatInput,
   decodeZakatInput,
+  DEFAULT_MAKING_CHARGE_RATE,
   type ZakatInput,
   type ZakatResult,
   type CashAssets,
@@ -95,6 +96,10 @@ function loadInputFromStorage(lang: "en" | "bn"): ZakatInput {
         // Backwards compatibility: add loansGiven if missing from old saved data
         if (!parsed.loansGiven) {
           parsed.loansGiven = createDefaultLoansGiven(lang);
+        }
+        // Backwards compatibility: add makingChargeRate if missing from old saved data
+        if (parsed.makingChargeRate == null) {
+          parsed.makingChargeRate = DEFAULT_MAKING_CHARGE_RATE;
         }
         return parsed;
       }
@@ -241,6 +246,11 @@ export function ZakatCalculator() {
   const updateNisabMethod = useCallback(
     (nisabMethod: "gold" | "silver") =>
       setInput((prev) => ({ ...prev, nisabMethod })),
+    []
+  );
+  const updateMakingChargeRate = useCallback(
+    (makingChargeRate: number) =>
+      setInput((prev) => ({ ...prev, makingChargeRate })),
     []
   );
 
@@ -423,9 +433,11 @@ export function ZakatCalculator() {
               goldPrice={input.goldPricePerGram}
               silverPrice={input.silverPricePerGram}
               nisabMethod={input.nisabMethod}
+              makingChargeRate={input.makingChargeRate}
               onGoldPriceChange={updateGoldPrice}
               onSilverPriceChange={updateSilverPrice}
               onNisabMethodChange={updateNisabMethod}
+              onMakingChargeRateChange={updateMakingChargeRate}
             />
 
             {/* ─── Asset Category Tabs ───────────────────────────── */}

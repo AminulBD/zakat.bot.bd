@@ -312,8 +312,8 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                 valueClass="text-amber-600 dark:text-amber-400"
                 hint={
                   result.nisabMethod === "gold"
-                    ? `${GOLD_NISAB_GRAMS}g ${lang === "bn" ? "স্বর্ণ" : "gold"}`
-                    : `${SILVER_NISAB_GRAMS}g ${lang === "bn" ? "রৌপ্য" : "silver"}`
+                    ? `${GOLD_NISAB_GRAMS}g ${lang === "bn" ? "স্বর্ণ" : "gold"} − ${Math.round(result.makingChargeRate * 100)}% ${lang === "bn" ? "মেকিং চার্জ" : "making charge"}`
+                    : `${SILVER_NISAB_GRAMS}g ${lang === "bn" ? "রৌপ্য" : "silver"} − ${Math.round(result.makingChargeRate * 100)}% ${lang === "bn" ? "মেকিং চার্জ" : "making charge"}`
                 }
               />
             </div>

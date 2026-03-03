@@ -1,4 +1,7 @@
+import { useCallback, useState, useRef, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/zakat/currency-input";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -7,15 +10,17 @@ import {
   SILVER_NISAB_GRAMS,
   formatBDT,
 } from "@/lib/zakat";
-import { Scale, CircleAlert, Coins, ExternalLink } from "lucide-react";
+import { Scale, CircleAlert, Coins, ExternalLink, Percent } from "lucide-react";
 
 interface NisabSettingsProps {
   goldPrice: number;
   silverPrice: number;
   nisabMethod: "gold" | "silver";
+  makingChargeRate: number;
   onGoldPriceChange: (price: number) => void;
   onSilverPriceChange: (price: number) => void;
   onNisabMethodChange: (method: "gold" | "silver") => void;
+  onMakingChargeRateChange: (rate: number) => void;
 }
 
 /**
@@ -32,14 +37,19 @@ export function NisabSettings({
   goldPrice,
   silverPrice,
   nisabMethod,
+  makingChargeRate,
   onGoldPriceChange,
   onSilverPriceChange,
   onNisabMethodChange,
+  onMakingChargeRateChange,
 }: NisabSettingsProps) {
   const { t, lang } = useI18n();
 
-  const goldNisab = GOLD_NISAB_GRAMS * (goldPrice || 0);
-  const silverNisab = SILVER_NISAB_GRAMS * (silverPrice || 0);
+  const rate = Math.max(0, Math.min(1, makingChargeRate));
+  const goldNisabRaw = GOLD_NISAB_GRAMS * (goldPrice || 0);
+  const silverNisabRaw = SILVER_NISAB_GRAMS * (silverPrice || 0);
+  const goldNisab = goldNisabRaw * (1 - rate);
+  const silverNisab = silverNisabRaw * (1 - rate);
 
   return (
     <Card className="relative overflow-hidden ring-1 ring-primary/10">
@@ -77,7 +87,7 @@ export function NisabSettings({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <CurrencyInput
                 label={t("currentGoldPrice")}
@@ -110,6 +120,11 @@ export function NisabSettings({
                   ? "বিশুদ্ধ রৌপ্যের প্রতি গ্রামের দাম"
                   : "Pure silver price per gram in BDT"
               }
+            />
+            <MakingChargeInput
+              value={makingChargeRate}
+              onChange={onMakingChargeRateChange}
+              lang={lang}
             />
           </div>
         </div>
@@ -192,6 +207,14 @@ export function NisabSettings({
                   </span>
                 </div>
               </div>
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-primary/10">
+                <span className="text-[10px] text-muted-foreground/60">
+                  {lang === "bn" ? "মেকিং চার্জ কর্তন" : "Making charge deduction"}
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground/60">
+                  {Math.round(rate * 100)}%
+                </span>
+              </div>
               <p className="text-[10px] leading-snug text-muted-foreground/60 pt-1 border-t border-primary/10">
                 {t("nisabNote")}
               </p>
@@ -200,6 +223,106 @@ export function NisabSettings({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Making Charge Percentage Input ──────────────────────────────────────────
+
+interface MakingChargeInputProps {
+  value: number;   // 0–1 (e.g. 0.17 for 17%)
+  onChange: (rate: number) => void;
+  lang: "en" | "bn";
+}
+
+function MakingChargeInput({ value, onChange, lang }: MakingChargeInputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const [displayValue, setDisplayValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Convert ratio (0–1) to percentage for display
+  const pct = Math.round(value * 100);
+
+  useEffect(() => {
+    if (!isFocused) {
+      setDisplayValue(pct === 0 ? "" : pct.toString());
+    }
+  }, [pct, isFocused]);
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+    setDisplayValue(pct === 0 ? "" : pct.toString());
+    setTimeout(() => inputRef.current?.select(), 0);
+  }, [pct]);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    const cleaned = displayValue.replace(/[^0-9]/g, "");
+    const parsed = parseInt(cleaned, 10);
+    const clamped = isNaN(parsed) ? 0 : Math.max(0, Math.min(100, parsed));
+    onChange(clamped / 100);
+    setDisplayValue(clamped === 0 ? "" : clamped.toString());
+  }, [displayValue, onChange]);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value;
+      if (raw === "") {
+        setDisplayValue("");
+        onChange(0);
+        return;
+      }
+      const sanitized = raw.replace(/[^0-9]/g, "");
+      setDisplayValue(sanitized);
+      const parsed = parseInt(sanitized, 10);
+      if (!isNaN(parsed)) {
+        onChange(Math.max(0, Math.min(100, parsed)) / 100);
+      }
+    },
+    [onChange]
+  );
+
+  return (
+    <div className="space-y-1.5">
+      <Label
+        htmlFor="making-charge-rate"
+        className="text-xs font-medium text-foreground/80"
+      >
+        {lang === "bn" ? "মেকিং চার্জ" : "Making Charge"}
+      </Label>
+      <div className="relative">
+        <span
+          className={cn(
+            "pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/60",
+          )}
+        >
+          <Percent className="size-3.5" />
+        </span>
+        <Input
+          ref={inputRef}
+          id="making-charge-rate"
+          type="text"
+          inputMode="numeric"
+          value={displayValue}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          placeholder={lang === "bn" ? "যেমন: ১৭" : "e.g. 17"}
+          className={cn(
+            "h-9 pl-8 pr-8 tabular-nums transition-colors",
+            value > 0 && "border-primary/30"
+          )}
+          autoComplete="off"
+        />
+        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 select-none">
+          %
+        </span>
+      </div>
+      <p className="text-[11px] leading-tight text-muted-foreground/60">
+        {lang === "bn"
+          ? "বাংলাদেশে স্বর্ণ/রৌপ্যের মেকিং চার্জ সাধারণত ~১৭%। নিসাব থেকে কর্তন হবে।"
+          : "In Bangladesh, jewelry making charge is typically ~17%. Deducted from nisab threshold."}
+      </p>
+    </div>
   );
 }
 
