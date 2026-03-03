@@ -939,30 +939,26 @@ function LoanEntryRow({
         )}
       </div>
 
-      {/* Amount input */}
-      <CurrencyInput
-        label=""
-        value={entry.amount}
-        onChange={(v) => onUpdate({ amount: v })}
-        id={`loan-amount-${entry.id}`}
-      />
-
-      {/* Years outstanding input */}
-      <div className="mt-2.5">
-        <div className="flex items-center gap-2 mb-1.5">
-          <Clock className="size-3 text-muted-foreground/50" />
-          <Label className="text-[11px] text-muted-foreground font-medium">
-            {t("yearsOutstanding")}
-          </Label>
+      {/* Amount + Years in a single row */}
+      <div className="flex items-end gap-2">
+        <div className="flex-1 min-w-0">
+          <CurrencyInput
+            label=""
+            value={entry.amount}
+            onChange={(v) => onUpdate({ amount: v })}
+            id={`loan-amount-${entry.id}`}
+          />
         </div>
-        <CurrencyInput
-          label=""
-          value={entry.yearsOutstanding}
-          onChange={(v) => onUpdate({ yearsOutstanding: Math.max(1, Math.round(v)) })}
-          id={`loan-years-${entry.id}`}
-          isCurrency={false}
-          suffix={lang === "bn" ? t("yearsSuffixPlural") : (entry.yearsOutstanding === 1 ? t("yearsSuffix") : t("yearsSuffixPlural"))}
-        />
+        <div className="w-28 shrink-0">
+          <CurrencyInput
+            label=""
+            value={entry.yearsOutstanding}
+            onChange={(v) => onUpdate({ yearsOutstanding: Math.max(1, Math.round(v)) })}
+            id={`loan-years-${entry.id}`}
+            isCurrency={false}
+            suffix={lang === "bn" ? t("yearsSuffixPlural") : (entry.yearsOutstanding === 1 ? t("yearsSuffix") : t("yearsSuffixPlural"))}
+          />
+        </div>
       </div>
 
       {/* Zakat preview for this loan */}
