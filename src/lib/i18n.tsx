@@ -138,6 +138,24 @@ const translations = {
     suggestedItems: "Suggested items",
     customItem: "Custom item",
     customItemPlaceholder: "Type a custom name...",
+
+    // Saved calculations
+    saveCalculation: "Save",
+    savedCalculations: "Saved Calculations",
+    savedCalculationsDesc: "Your previously saved Zakat calculations",
+    noSavedCalculations: "No saved calculations",
+    noSavedCalculationsHint: "Save your current calculation to access it later",
+    loadCalculation: "Load",
+    deleteCalculation: "Delete",
+    deleteAllCalculations: "Delete All",
+    calculationSaved: "Saved!",
+    calculationName: "Calculation name",
+    calculationNamePlaceholder: "e.g. Ramadan 2025",
+    savedOn: "Saved on",
+    zakatAmount: "Zakat",
+    totalAssetsLabel: "Assets",
+    confirmDeleteAll: "Are you sure you want to delete all saved calculations?",
+    confirmDelete: "Are you sure you want to delete this calculation?",
   },
   bn: {
     // App
@@ -274,6 +292,24 @@ const translations = {
     suggestedItems: "প্রস্তাবিত আইটেম",
     customItem: "কাস্টম আইটেম",
     customItemPlaceholder: "একটি কাস্টম নাম লিখুন...",
+
+    // Saved calculations
+    saveCalculation: "সংরক্ষণ",
+    savedCalculations: "সংরক্ষিত হিসাব",
+    savedCalculationsDesc: "আপনার পূর্বে সংরক্ষিত যাকাত হিসাবসমূহ",
+    noSavedCalculations: "কোনো সংরক্ষিত হিসাব নেই",
+    noSavedCalculationsHint: "পরে দেখতে আপনার বর্তমান হিসাব সংরক্ষণ করুন",
+    loadCalculation: "লোড",
+    deleteCalculation: "মুছুন",
+    deleteAllCalculations: "সব মুছুন",
+    calculationSaved: "সংরক্ষিত!",
+    calculationName: "হিসাবের নাম",
+    calculationNamePlaceholder: "যেমন: রমজান ২০২৫",
+    savedOn: "সংরক্ষণের তারিখ",
+    zakatAmount: "যাকাত",
+    totalAssetsLabel: "সম্পদ",
+    confirmDeleteAll: "আপনি কি সব সংরক্ষিত হিসাব মুছে ফেলতে চান?",
+    confirmDelete: "আপনি কি এই হিসাবটি মুছে ফেলতে চান?",
   },
 } as const;
 

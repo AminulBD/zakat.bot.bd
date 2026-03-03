@@ -32,6 +32,7 @@ import {
 } from "@/components/zakat/asset-categories";
 import { NisabSettings } from "@/components/zakat/nisab-settings";
 import { ZakatSummary } from "@/components/zakat/zakat-summary";
+import { SavedCalculations } from "@/components/zakat/saved-calculations";
 import { IslamicPattern, IslamicArch, IslamicDivider, MosqueIcon } from "@/components/zakat/islamic-pattern";
 import {
   RotateCcw,
@@ -293,6 +294,11 @@ export function ZakatCalculator() {
     });
   }, [input, lang]);
 
+  const handleLoadSaved = useCallback((savedInput: ZakatInput) => {
+    setInput(savedInput);
+    setIsSharedView(false);
+  }, []);
+
   // ─── Render ──────────────────────────────────────────────────────────────
   return (
     <div
@@ -533,8 +539,13 @@ export function ZakatCalculator() {
           </div>
 
           {/* ─── RIGHT COLUMN: Summary/Result ─────────────────────── */}
-          <div className="lg:sticky lg:top-6">
+          <div className="lg:sticky lg:top-6 space-y-4">
             <ZakatSummary result={result} />
+            <SavedCalculations
+              currentInput={input}
+              currentResult={result}
+              onLoad={handleLoadSaved}
+            />
           </div>
         </div>
 
