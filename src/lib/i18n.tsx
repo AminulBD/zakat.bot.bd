@@ -98,6 +98,11 @@ const translations = {
     reset: "Reset All",
     currency: "BDT",
     currencySymbol: "৳",
+    shareLink: "Share",
+    copyLink: "Copy Link",
+    linkCopied: "Link copied!",
+    sharedCalculation: "Shared Calculation",
+    sharedCalculationDesc: "This calculation was shared with you. You can modify the values below.",
 
     // Quran verse
     quranVerse: "\"Take from their wealth a charity to purify them and cause them increase.\"",
@@ -227,6 +232,11 @@ const translations = {
     reset: "সব মুছুন",
     currency: "টাকা",
     currencySymbol: "৳",
+    shareLink: "শেয়ার",
+    copyLink: "লিংক কপি",
+    linkCopied: "লিংক কপি হয়েছে!",
+    sharedCalculation: "শেয়ারকৃত হিসাব",
+    sharedCalculationDesc: "এই হিসাবটি আপনার সাথে শেয়ার করা হয়েছে। নিচে মান পরিবর্তন করতে পারেন।",
 
     // Quran verse
     quranVerse: "\"তাদের সম্পদ থেকে সদকা নাও, যা দ্বারা তুমি তাদের পবিত্র ও পরিশুদ্ধ করবে।\"",

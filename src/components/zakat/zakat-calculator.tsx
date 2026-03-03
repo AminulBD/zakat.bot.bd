@@ -8,6 +8,8 @@ import {
   calculateZakat,
   createDefaultInput,
   createDefaultLoansGiven,
+  encodeZakatInput,
+  decodeZakatInput,
   type ZakatInput,
   type ZakatResult,
   type CashAssets,
@@ -44,12 +46,34 @@ import {
   FileWarning,
   TriangleAlert,
   Github,
+  Share2,
+  Check,
+  Link,
 } from "lucide-react";
 
 // ─── LocalStorage keys ───────────────────────────────────────────────────────
 
 const STORAGE_KEY_INPUT = "zakat-input";
 const STORAGE_KEY_TAB = "zakat-active-tab";
+
+const SHARE_PARAM = "d";
+
+/**
+ * Try to decode shared calculation data from the URL query string.
+ * Returns the decoded ZakatInput if `?d=...` is present and valid, otherwise null.
+ */
+function loadInputFromURL(): ZakatInput | null {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get(SHARE_PARAM);
+    if (encoded) {
+      return decodeZakatInput(encoded);
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
 
 function loadInputFromStorage(lang: "en" | "bn"): ZakatInput {
   try {
@@ -81,10 +105,12 @@ function loadInputFromStorage(lang: "en" | "bn"): ZakatInput {
   return createDefaultInput(lang);
 }
 
+const VALID_TABS = ["cash", "gold", "silver", "investments", "others", "loansGiven", "liabilities"];
+
 function loadTabFromStorage(): string {
   try {
     const saved = localStorage.getItem(STORAGE_KEY_TAB);
-    if (saved && ["cash", "gold", "silver", "investments", "others", "liabilities"].includes(saved)) {
+    if (saved && VALID_TABS.includes(saved)) {
       return saved;
     }
   } catch {
@@ -124,9 +150,32 @@ export function ZakatCalculator() {
   const { t, lang, toggleLanguage } = useI18n();
   const { isDark, toggleTheme } = useTheme();
 
-  // ─── State (hydrated from localStorage) ──────────────────────────────────
-  const [input, setInput] = useState<ZakatInput>(() => loadInputFromStorage(lang));
+  // ─── State (hydrated from URL shared data or localStorage) ───────────────
+  const [isSharedView, setIsSharedView] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).has(SHARE_PARAM);
+    } catch {
+      return false;
+    }
+  });
+  const [copied, setCopied] = useState(false);
+  const [input, setInput] = useState<ZakatInput>(() => {
+    const fromURL = loadInputFromURL();
+    if (fromURL) return fromURL;
+    return loadInputFromStorage(lang);
+  });
   const [activeTab, setActiveTab] = useState(() => loadTabFromStorage());
+
+  // On mount, clean the shared URL param so subsequent edits don't re-trigger
+  useEffect(() => {
+    if (isSharedView) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete(SHARE_PARAM);
+      window.history.replaceState({}, "", url.pathname);
+    }
+    // Only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ─── Persist state to localStorage ───────────────────────────────────────
   useEffect(() => {
@@ -199,6 +248,7 @@ export function ZakatCalculator() {
     const defaults = createDefaultInput(lang);
     setInput(defaults);
     setActiveTab("cash");
+    setIsSharedView(false);
     try {
       localStorage.removeItem(STORAGE_KEY_INPUT);
       localStorage.removeItem(STORAGE_KEY_TAB);
@@ -206,6 +256,25 @@ export function ZakatCalculator() {
       // ignore
     }
   }, [lang]);
+
+  const handleShare = useCallback(() => {
+    const encoded = encodeZakatInput(input);
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.searchParams.set(SHARE_PARAM, encoded);
+    const shareURL = url.toString();
+
+    navigator.clipboard.writeText(shareURL).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // Fallback: prompt user
+      window.prompt(
+        lang === "bn" ? "লিংক কপি করুন:" : "Copy this link:",
+        shareURL
+      );
+    });
+  }, [input, lang]);
 
   // ─── Render ──────────────────────────────────────────────────────────────
   return (
@@ -238,6 +307,28 @@ export function ZakatCalculator() {
 
           {/* Right: Controls */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Share Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className={cn(
+                "gap-1.5 text-[11px] h-7 transition-colors",
+                copied && "border-emerald-500/50 text-emerald-600 dark:text-emerald-400"
+              )}
+              disabled={result.totalAssets === 0}
+              title={copied ? t("linkCopied") : t("shareLink")}
+            >
+              {copied ? (
+                <Check className="size-3.5" />
+              ) : (
+                <Share2 className="size-3.5" />
+              )}
+              <span className="hidden sm:inline">
+                {copied ? t("linkCopied") : t("shareLink")}
+              </span>
+            </Button>
+
             {/* Language Toggle */}
             <Button
               variant="outline"
@@ -297,6 +388,21 @@ export function ZakatCalculator() {
             {t("appDescription")}
           </p>
         </header>
+
+        {/* ─── Shared Calculation Banner ───────────────────────────── */}
+        {isSharedView && (
+          <div className="mb-6 flex items-start gap-3 border border-blue-500/30 bg-blue-50/60 dark:bg-blue-500/5 px-4 py-3 print:hidden">
+            <Link className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs font-semibold text-blue-900/80 dark:text-blue-200/80">
+                {t("sharedCalculation")}
+              </p>
+              <p className="text-[11px] leading-relaxed text-blue-800/60 dark:text-blue-300/60 mt-0.5">
+                {t("sharedCalculationDesc")}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ─── Caution Banner ──────────────────────────────────────── */}
         <div className="mb-6 flex items-start gap-3 border border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/5 px-4 py-3 print:hidden">

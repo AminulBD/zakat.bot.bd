@@ -511,6 +511,136 @@ export function updateLoanEntry(
   return entries.map((e) => (e.id === id ? { ...e, ...updates } : e));
 }
 
+// ─── URL Sharing (Base64 encode/decode) ──────────────────────────────────────
+
+/**
+ * Compact representation of ZakatInput for URL sharing.
+ * Strips IDs and only keeps entries with non-zero values to minimize payload.
+ */
+interface CompactEntry {
+  l: string;   // label
+  a: number;   // amount
+}
+
+interface CompactMetalEntry {
+  l: string;   // label
+  w: number;   // weightGrams
+  m: boolean;  // useManualValue
+  v: number;   // manualValue
+}
+
+interface CompactLoanEntry {
+  l: string;   // label
+  a: number;   // amount
+  y: number;   // yearsOutstanding
+}
+
+interface CompactInput {
+  c: CompactEntry[];          // cash
+  g: CompactMetalEntry[];     // gold
+  s: CompactMetalEntry[];     // silver
+  i: CompactEntry[];          // investments
+  o: CompactEntry[];          // others
+  lg: CompactLoanEntry[];     // loansGiven
+  li: CompactEntry[];         // liabilities
+  gp: number;                 // goldPricePerGram
+  sp: number;                 // silverPricePerGram
+  nm: "g" | "s";             // nisabMethod
+}
+
+/**
+ * Encode ZakatInput into a URL-safe base64 string.
+ * Only includes entries that have a non-zero amount/weight for compactness.
+ */
+export function encodeZakatInput(input: ZakatInput): string {
+  const compact: CompactInput = {
+    c: input.cash.entries
+      .filter((e) => safeNum(e.amount) > 0)
+      .map((e) => ({ l: e.label, a: e.amount })),
+    g: input.gold.entries
+      .filter((e) => e.weightGrams > 0 || e.manualValue > 0)
+      .map((e) => ({ l: e.label, w: e.weightGrams, m: e.useManualValue, v: e.manualValue })),
+    s: input.silver.entries
+      .filter((e) => e.weightGrams > 0 || e.manualValue > 0)
+      .map((e) => ({ l: e.label, w: e.weightGrams, m: e.useManualValue, v: e.manualValue })),
+    i: input.investments.entries
+      .filter((e) => safeNum(e.amount) > 0)
+      .map((e) => ({ l: e.label, a: e.amount })),
+    o: input.others.entries
+      .filter((e) => safeNum(e.amount) > 0)
+      .map((e) => ({ l: e.label, a: e.amount })),
+    lg: input.loansGiven.entries
+      .filter((e) => safeNum(e.amount) > 0)
+      .map((e) => ({ l: e.label, a: e.amount, y: e.yearsOutstanding })),
+    li: input.liabilities.entries
+      .filter((e) => safeNum(e.amount) > 0)
+      .map((e) => ({ l: e.label, a: e.amount })),
+    gp: input.goldPricePerGram,
+    sp: input.silverPricePerGram,
+    nm: input.nisabMethod === "gold" ? "g" : "s",
+  };
+
+  const json = JSON.stringify(compact);
+  // TextEncoder → Uint8Array → base64 (handles Unicode labels like Bengali)
+  const bytes = new TextEncoder().encode(json);
+  const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join("");
+  const base64 = btoa(binary);
+  // Make URL-safe: replace +/ with -_ and strip trailing =
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
+ * Decode a URL-safe base64 string back into a ZakatInput.
+ * Returns null if the data is corrupted or invalid.
+ */
+export function decodeZakatInput(encoded: string): ZakatInput | null {
+  try {
+    // Restore standard base64 from URL-safe variant
+    let base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+    // Re-add padding
+    while (base64.length % 4 !== 0) {
+      base64 += "=";
+    }
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
+    const json = new TextDecoder().decode(bytes);
+    const compact = JSON.parse(json) as CompactInput;
+
+    // Validate basic structure
+    if (!compact || typeof compact !== "object") return null;
+
+    const toEntries = (arr?: CompactEntry[]): Entry[] =>
+      (arr || []).map((e) => createEntry(e.l, safeNum(e.a)));
+
+    const toMetalEntries = (arr?: CompactMetalEntry[]): MetalEntry[] =>
+      (arr || []).map((e) => ({
+        id: generateId(),
+        label: e.l,
+        weightGrams: safeNum(e.w),
+        useManualValue: !!e.m,
+        manualValue: safeNum(e.v),
+      }));
+
+    const toLoanEntries = (arr?: CompactLoanEntry[]): LoanEntry[] =>
+      (arr || []).map((e) => createLoanEntry(e.l, safeNum(e.a), safeNum(e.y) || 1));
+
+    return {
+      cash: { entries: toEntries(compact.c) },
+      gold: { entries: toMetalEntries(compact.g) },
+      silver: { entries: toMetalEntries(compact.s) },
+      investments: { entries: toEntries(compact.i) },
+      others: { entries: toEntries(compact.o) },
+      loansGiven: { entries: toLoanEntries(compact.lg) },
+      liabilities: { entries: toEntries(compact.li) },
+      goldPricePerGram: safeNum(compact.gp) || DEFAULT_GOLD_PRICE_PER_GRAM,
+      silverPricePerGram: safeNum(compact.sp) || DEFAULT_SILVER_PRICE_PER_GRAM,
+      nisabMethod: compact.nm === "g" ? "gold" : "silver",
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ─── Formatting Utilities ────────────────────────────────────────────────────
 
 /**
