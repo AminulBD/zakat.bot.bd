@@ -125,7 +125,7 @@ export function CurrencyInput({
     <div className={cn("space-y-1.5", className)}>
       <Label
         htmlFor={inputId}
-        className="text-xs font-medium text-foreground/80"
+        className="text-sm font-medium text-foreground"
       >
         {label}
       </Label>
@@ -133,10 +133,10 @@ export function CurrencyInput({
         {isCurrency && (
           <span
             className={cn(
-              "pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-medium select-none",
+              "pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm font-medium select-none",
               value > 0
                 ? "text-primary"
-                : "text-muted-foreground/60"
+                : "text-muted-foreground"
             )}
           >
             ৳
@@ -164,13 +164,13 @@ export function CurrencyInput({
           autoComplete="off"
         />
         {suffix && (
-          <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 select-none">
+          <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none">
             {suffix}
           </span>
         )}
       </div>
       {hint && (
-        <p className="text-[11px] leading-tight text-muted-foreground/60">
+        <p className="text-xs leading-tight text-muted-foreground">
           {hint}
         </p>
       )}

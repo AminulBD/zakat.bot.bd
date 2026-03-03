@@ -43,6 +43,9 @@ export interface MetalEntry {
   /** If true, user enters BDT value directly instead of weight */
   useManualValue: boolean;
   manualValue: number;
+  /** If true, making charge is deducted when using weight-in-grams mode.
+   *  Defaults to true (jewelry). Set to false for bars/coins (pure metal). */
+  hasMakingCharge: boolean;
 }
 
 /**
@@ -152,13 +155,14 @@ export function createLoanEntry(label: string, amount: number = 0, yearsOutstand
   return { id: generateId(), label, amount, yearsOutstanding };
 }
 
-export function createMetalEntry(label: string): MetalEntry {
+export function createMetalEntry(label: string, hasMakingCharge: boolean = true): MetalEntry {
   return {
     id: generateId(),
     label,
     weightGrams: 0,
     useManualValue: false,
     manualValue: 0,
+    hasMakingCharge,
   };
 }
 
@@ -273,7 +277,11 @@ function presetsToEntries(presets: CategoryPreset[], lang: "en" | "bn" = "en"): 
 }
 
 function presetsToMetalEntries(presets: CategoryPreset[], lang: "en" | "bn" = "en"): MetalEntry[] {
-  return presets.map((p) => createMetalEntry(lang === "bn" ? p.bn : p.en));
+  return presets.map((p) => {
+    // Bars/coins are pure metal — no making charge
+    const isBarOrCoin = p.key === "goldBar" || p.key === "silverBar";
+    return createMetalEntry(lang === "bn" ? p.bn : p.en, !isBarOrCoin);
+  });
 }
 
 function presetsToLoanEntries(presets: CategoryPreset[], lang: "en" | "bn" = "en"): LoanEntry[] {
@@ -347,15 +355,31 @@ export function calculateLoanZakat(entries: LoanEntry[]): number {
   }, 0);
 }
 
-export function metalEntryValue(entry: MetalEntry, pricePerGram: number): number {
+/**
+ * Calculate the zakatable value of a single gold/silver entry.
+ *
+ * When the user enters weight in grams AND the entry has `hasMakingCharge`
+ * enabled (jewelry), the making charge is deducted because jewelry's resale
+ * value is lower than the raw metal market price
+ * (e.g. 10g × ৳8,000/g × (1 − 17%) = ৳66,400 instead of ৳80,000).
+ *
+ * For bars/coins (`hasMakingCharge: false`) or manual BDT values, no
+ * deduction is applied.
+ */
+export function metalEntryValue(entry: MetalEntry, pricePerGram: number, makingChargeRate: number = 0): number {
   if (entry.useManualValue) {
     return safeNum(entry.manualValue);
   }
-  return safeNum(entry.weightGrams) * safeNum(pricePerGram);
+  const raw = safeNum(entry.weightGrams) * safeNum(pricePerGram);
+  if (entry.hasMakingCharge) {
+    const rate = Math.max(0, Math.min(1, safeNum(makingChargeRate)));
+    return raw * (1 - rate);
+  }
+  return raw;
 }
 
-export function sumMetalEntries(entries: MetalEntry[], pricePerGram: number): number {
-  return entries.reduce((sum, e) => sum + metalEntryValue(e, pricePerGram), 0);
+export function sumMetalEntries(entries: MetalEntry[], pricePerGram: number, makingChargeRate: number = 0): number {
+  return entries.reduce((sum, e) => sum + metalEntryValue(e, pricePerGram, makingChargeRate), 0);
 }
 
 export function calculateNisab(
@@ -384,8 +408,8 @@ export function calculateZakat(input: ZakatInput): ZakatResult {
   const makingChargeRate = safeNum(input.makingChargeRate ?? DEFAULT_MAKING_CHARGE_RATE);
 
   const cashTotal = sumEntries(input.cash.entries);
-  const goldTotal = sumMetalEntries(input.gold.entries, goldPrice);
-  const silverTotal = sumMetalEntries(input.silver.entries, silverPrice);
+  const goldTotal = sumMetalEntries(input.gold.entries, goldPrice, makingChargeRate);
+  const silverTotal = sumMetalEntries(input.silver.entries, silverPrice, makingChargeRate);
   const investmentTotal = sumEntries(input.investments.entries);
   const othersTotal = sumEntries(input.others.entries);
   const loansGivenTotal = sumLoanEntries(input.loansGiven.entries);
@@ -417,15 +441,15 @@ export function calculateZakat(input: ZakatInput): ZakatResult {
       label: "gold",
       amount: goldTotal,
       items: input.gold.entries
-        .filter((e) => metalEntryValue(e, goldPrice) > 0)
-        .map((e) => ({ label: e.label, amount: metalEntryValue(e, goldPrice) })),
+        .filter((e) => metalEntryValue(e, goldPrice, makingChargeRate) > 0)
+        .map((e) => ({ label: e.label, amount: metalEntryValue(e, goldPrice, makingChargeRate) })),
     },
     {
       label: "silver",
       amount: silverTotal,
       items: input.silver.entries
-        .filter((e) => metalEntryValue(e, silverPrice) > 0)
-        .map((e) => ({ label: e.label, amount: metalEntryValue(e, silverPrice) })),
+        .filter((e) => metalEntryValue(e, silverPrice, makingChargeRate) > 0)
+        .map((e) => ({ label: e.label, amount: metalEntryValue(e, silverPrice, makingChargeRate) })),
     },
     {
       label: "investments",
@@ -545,6 +569,7 @@ interface CompactMetalEntry {
   w: number;   // weightGrams
   m: boolean;  // useManualValue
   v: number;   // manualValue
+  h?: boolean; // hasMakingCharge (omitted = true for backward compat)
 }
 
 interface CompactLoanEntry {
@@ -578,10 +603,10 @@ export function encodeZakatInput(input: ZakatInput): string {
       .map((e) => ({ l: e.label, a: e.amount })),
     g: input.gold.entries
       .filter((e) => e.weightGrams > 0 || e.manualValue > 0)
-      .map((e) => ({ l: e.label, w: e.weightGrams, m: e.useManualValue, v: e.manualValue })),
+      .map((e) => ({ l: e.label, w: e.weightGrams, m: e.useManualValue, v: e.manualValue, ...(e.hasMakingCharge ? {} : { h: false }) })),
     s: input.silver.entries
       .filter((e) => e.weightGrams > 0 || e.manualValue > 0)
-      .map((e) => ({ l: e.label, w: e.weightGrams, m: e.useManualValue, v: e.manualValue })),
+      .map((e) => ({ l: e.label, w: e.weightGrams, m: e.useManualValue, v: e.manualValue, ...(e.hasMakingCharge ? {} : { h: false }) })),
     i: input.investments.entries
       .filter((e) => safeNum(e.amount) > 0)
       .map((e) => ({ l: e.label, a: e.amount })),
@@ -639,6 +664,7 @@ export function decodeZakatInput(encoded: string): ZakatInput | null {
         weightGrams: safeNum(e.w),
         useManualValue: !!e.m,
         manualValue: safeNum(e.v),
+        hasMakingCharge: e.h !== false,  // default true for backward compat
       }));
 
     const toLoanEntries = (arr?: CompactLoanEntry[]): LoanEntry[] =>

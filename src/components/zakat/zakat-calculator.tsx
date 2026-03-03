@@ -101,6 +101,13 @@ function loadInputFromStorage(lang: "en" | "bn"): ZakatInput {
         if (parsed.makingChargeRate == null) {
           parsed.makingChargeRate = DEFAULT_MAKING_CHARGE_RATE;
         }
+        // Backwards compatibility: add hasMakingCharge to old metal entries
+        for (const entry of parsed.gold.entries) {
+          if (entry.hasMakingCharge == null) entry.hasMakingCharge = true;
+        }
+        for (const entry of parsed.silver.entries) {
+          if (entry.hasMakingCharge == null) entry.hasMakingCharge = true;
+        }
         return parsed;
       }
     }
@@ -310,7 +317,7 @@ export function ZakatCalculator() {
           {/* Left: Logo + Title */}
           <div className="flex items-center gap-2.5 min-w-0">
             <MosqueIcon size={28} className="shrink-0" />
-            <span className="text-sm font-bold text-foreground truncate">
+            <span className="text-base font-bold text-foreground truncate">
               {t("appTitle")}
             </span>
           </div>
@@ -323,7 +330,7 @@ export function ZakatCalculator() {
               size="sm"
               onClick={handleShare}
               className={cn(
-                "gap-1.5 text-[11px] h-7 transition-colors",
+                "gap-1.5 text-xs h-7 transition-colors",
                 copied && "border-emerald-500/50 text-emerald-600 dark:text-emerald-400"
               )}
               disabled={result.totalAssets === 0}
@@ -344,7 +351,7 @@ export function ZakatCalculator() {
               variant="outline"
               size="sm"
               onClick={toggleLanguage}
-              className="gap-1.5 text-[11px] h-7"
+              className="gap-1.5 text-xs h-7"
               title={lang === "en" ? "বাংলায় দেখুন" : "Switch to English"}
             >
               <Languages className="size-3.5" />
@@ -382,10 +389,10 @@ export function ZakatCalculator() {
         {/* ─── Header Section ──────────────────────────────────────── */}
         <header className="mb-8 text-center print:hidden">
           {/* Bismillah */}
-          <p className="text-xl sm:text-2xl font-arabic text-primary/60 mb-1 leading-relaxed" dir="rtl">
+          <p className="text-xl sm:text-2xl font-arabic text-primary/80 mb-1 leading-relaxed" dir="rtl">
             {t("bismillah")}
           </p>
-          <p className="text-[11px] text-muted-foreground/60 mb-4">
+          <p className="text-xs text-muted-foreground mb-4">
             {t("bismillahTranslation")}
           </p>
 
@@ -394,7 +401,7 @@ export function ZakatCalculator() {
           <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight mb-1.5">
             {t("appTitle")}
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+          <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
             {t("appDescription")}
           </p>
         </header>
@@ -404,10 +411,10 @@ export function ZakatCalculator() {
           <div className="mb-6 flex items-start gap-3 border border-blue-500/30 bg-blue-50/60 dark:bg-blue-500/5 px-4 py-3 print:hidden">
             <Link className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
             <div>
-              <p className="text-xs font-semibold text-blue-900/80 dark:text-blue-200/80">
+              <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
                 {t("sharedCalculation")}
               </p>
-              <p className="text-[11px] leading-relaxed text-blue-800/60 dark:text-blue-300/60 mt-0.5">
+              <p className="text-xs leading-relaxed text-blue-800/80 dark:text-blue-300/80 mt-0.5">
                 {t("sharedCalculationDesc")}
               </p>
             </div>
@@ -417,7 +424,7 @@ export function ZakatCalculator() {
         {/* ─── Caution Banner ──────────────────────────────────────── */}
         <div className="mb-6 flex items-start gap-3 border border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/5 px-4 py-3 print:hidden">
           <TriangleAlert className="size-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-          <p className="text-xs leading-relaxed text-amber-900/80 dark:text-amber-200/80">
+          <p className="text-sm leading-relaxed text-amber-900 dark:text-amber-200">
             {lang === "bn"
               ? "⚠️ এই অ্যাপটি শুধুমাত্র হিসাবের উদ্দেশ্যে। চূড়ান্ত সিদ্ধান্ত নেওয়ার আগে অবশ্যই একজন আলেমের সাথে পরামর্শ করুন।"
               : "⚠️ This app is only for calculation purposes. Please consult with your scholar before finalizing your Zakat."}
@@ -454,11 +461,11 @@ export function ZakatCalculator() {
                       key={tab.value}
                       value={tab.value}
                       className={cn(
-                        "gap-1.5 text-[11px] px-2.5 py-1.5 flex-1 min-w-0 sm:flex-none",
+                        "gap-1.5 text-xs px-2.5 py-1.5 flex-1 min-w-0 sm:flex-none",
                         isLiability && "data-active:text-destructive"
                       )}
                     >
-                      <Icon className="size-3.5 shrink-0 hidden sm:block" />
+                      <Icon className="size-4 shrink-0 hidden sm:block" />
                       <span className="truncate">{getTabLabel(tab.value, lang)}</span>
                     </TabsTrigger>
                   );
@@ -474,6 +481,7 @@ export function ZakatCalculator() {
                 <GoldCategory
                   data={input.gold}
                   goldPrice={input.goldPricePerGram}
+                  makingChargeRate={input.makingChargeRate}
                   onChange={updateGold}
                 />
               </TabsContent>
@@ -482,6 +490,7 @@ export function ZakatCalculator() {
                 <SilverCategory
                   data={input.silver}
                   silverPrice={input.silverPricePerGram}
+                  makingChargeRate={input.makingChargeRate}
                   onChange={updateSilver}
                 />
               </TabsContent>
@@ -515,7 +524,7 @@ export function ZakatCalculator() {
                 variant="ghost"
                 size="sm"
                 onClick={handleReset}
-                className="gap-1.5 text-muted-foreground hover:text-destructive"
+                className="gap-1.5 text-sm text-muted-foreground hover:text-destructive"
               >
                 <RotateCcw className="size-3.5" />
                 {t("reset")}
@@ -533,19 +542,19 @@ export function ZakatCalculator() {
         <footer className="mt-12 mb-4 text-center print:hidden">
           <IslamicDivider />
           <blockquote className="mt-3 px-4">
-            <p className="text-xs italic text-muted-foreground leading-relaxed max-w-lg mx-auto">
+            <p className="text-sm italic text-muted-foreground leading-relaxed max-w-lg mx-auto">
               {t("quranVerse")}
             </p>
-            <cite className="text-[10px] text-muted-foreground not-italic block mt-1">
+            <cite className="text-xs text-muted-foreground not-italic block mt-1">
               {t("quranRef")}
             </cite>
           </blockquote>
-          <p className="text-[10px] text-muted-foreground mt-4">
+          <p className="text-xs text-muted-foreground mt-4">
             {lang === "bn"
               ? "এই ক্যালকুলেটর শুধুমাত্র একটি সহায়ক টুল। বিস্তারিত বিধানের জন্য একজন আলেমের সাথে পরামর্শ করুন।"
               : "This calculator is a helper tool only. Please consult a scholar for detailed rulings."}
           </p>
-          <p className="text-[10px] text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             🔒{" "}
             {lang === "bn"
               ? "এই অ্যাপ আপনার কোনো তথ্য সংরক্ষণ করে না — সবকিছু আপনার ব্রাউজারেই থাকে।"
@@ -555,7 +564,7 @@ export function ZakatCalculator() {
             href="https://github.com/AminulBD/zakat.bot.bd"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-[10px] hover:text-muted-foreground transition-colors mt-3"
+            className="inline-flex items-center gap-1.5 text-xs hover:text-muted-foreground transition-colors mt-3"
           >
             <Github className="size-3" />
             {lang === "bn" ? "সোর্স কোড" : "Source Code"}

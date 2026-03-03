@@ -135,7 +135,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
               <p className="text-sm font-medium">{getFormattedDate(lang)}</p>
             </div>
           </div>
-          <p className="text-center text-lg font-arabic mt-3 text-foreground/70 print:text-black/60">
+          <p className="text-center text-lg font-arabic mt-3 text-foreground/80 print:text-black/80">
             {t("bismillah")}
           </p>
         </div>
@@ -158,7 +158,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                 <CardTitle className="text-base font-bold leading-tight">
                   {t("summaryTitle")}
                 </CardTitle>
-                <CardDescription className="text-[11px] leading-tight mt-0.5">
+                <CardDescription className="text-xs leading-tight mt-0.5">
                   {t("zakatRate")}
                 </CardDescription>
               </div>
@@ -183,17 +183,17 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
           {hasAnyAssets && (
             <div className="border border-border/60 overflow-hidden">
               {/* Table Header */}
-              <div className="grid grid-cols-[1fr_auto] gap-2 bg-muted/40 px-3 py-2 border-b border-border/40">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_auto] gap-2 bg-muted/60 px-3 py-2 border-b border-border/60">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {t("category")}
                 </span>
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">
                   {t("amount")}
                 </span>
               </div>
 
               {/* Category Rows */}
-              <div className="divide-y divide-border/30">
+              <div className="divide-y divide-border/50">
                 {result.breakdown.map((category) => {
                   if (category.amount === 0) return null;
                   const IconComp = categoryIcons[category.label] || Package;
@@ -206,26 +206,26 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                         className={cn(
                           "grid grid-cols-[1fr_auto] gap-2 px-3 py-2.5 transition-colors",
                           isLiability
-                            ? "bg-destructive/[0.02] dark:bg-destructive/[0.04]"
-                            : "hover:bg-muted/20"
+                            ? "bg-destructive/[0.04] dark:bg-destructive/[0.08]"
+                            : "hover:bg-muted/30"
                         )}
                       >
                         <div className="flex items-center gap-2">
                           <IconComp
                             className={cn(
-                              "size-3.5 shrink-0",
+                              "size-4 shrink-0",
                               isLiability
-                                ? "text-destructive/60"
-                                : "text-primary/60"
+                                ? "text-destructive"
+                                : "text-primary"
                             )}
                           />
-                          <span className="text-xs font-semibold text-foreground">
+                          <span className="text-sm font-semibold text-foreground">
                             {getCategoryLabel(category.label, lang)}
                           </span>
                         </div>
                         <span
                           className={cn(
-                            "text-xs font-bold tabular-nums text-right",
+                            "text-sm font-bold tabular-nums text-right",
                             isLiability ? "text-destructive" : "text-foreground"
                           )}
                         >
@@ -235,7 +235,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                       </div>
 
                       {/* Item detail rows */}
-                      <div className="bg-muted/10 dark:bg-muted/5">
+                      <div className="bg-muted/20 dark:bg-muted/10">
                         {category.items
                           .filter((item) => item.amount > 0)
                           .map((item, idx) => (
@@ -243,10 +243,10 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                               key={`${item.label}-${idx}`}
                               className="grid grid-cols-[1fr_auto] gap-2 px-3 py-1.5 pl-9"
                             >
-                              <span className="text-[11px] text-muted-foreground truncate">
+                              <span className="text-xs text-foreground/80 truncate">
                                 {item.label}
                               </span>
-                              <span className="text-[11px] tabular-nums text-muted-foreground text-right">
+                              <span className="text-xs tabular-nums text-foreground/70 text-right">
                                 {formatBDT(item.amount, lang)}
                               </span>
                             </div>
@@ -280,7 +280,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                   icon={ArrowDown}
                   label={t("totalLiabilities")}
                   value={`− ${formatBDT(result.totalLiabilities, lang)}`}
-                  iconClass="text-destructive/70"
+                  iconClass="text-destructive"
                   valueClass="text-destructive"
                 />
               )}
@@ -346,7 +346,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
               <div>
                 <h3
                   className={cn(
-                    "text-sm font-bold",
+                    "text-base font-bold",
                     result.isZakatApplicable
                       ? "text-emerald-700 dark:text-emerald-300"
                       : "text-amber-700 dark:text-amber-300"
@@ -356,7 +356,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                     ? t("zakatApplicable")
                     : t("zakatNotApplicable")}
                 </h3>
-                <p className="text-[11px] text-muted-foreground mt-1 max-w-md mx-auto leading-relaxed">
+                <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto leading-relaxed">
                   {result.isZakatApplicable
                     ? t("zakatApplicableDesc")
                     : t("zakatNotApplicableDesc")}
@@ -366,7 +366,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
               {/* Zakat Amount */}
               {result.isZakatApplicable && (
                 <div className="pt-2 space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium">
+                  <p className="text-sm text-muted-foreground font-medium">
                     {t("zakatPayable")}
                   </p>
                   <p className="text-3xl sm:text-4xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 tracking-tight">
@@ -374,7 +374,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                   </p>
                   <Badge
                     variant="secondary"
-                    className="mt-1 text-[10px] font-medium"
+                    className="mt-1 text-xs font-medium"
                   >
                     {result.netAssets > 0
                       ? `${formatBDT(result.netAssets, lang)} × ${ZAKAT_RATE * 100}%`
@@ -385,27 +385,27 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                   {hasLoanZakat && (
                     <div className="mt-3 border border-dashed border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-2 text-left space-y-1">
                       <div className="flex items-center gap-1.5">
-                        <HandCoins className="size-3 text-amber-600 dark:text-amber-400" />
-                        <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                        <HandCoins className="size-3.5 text-amber-600 dark:text-amber-400" />
+                        <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
                           {t("loanZakatLabel")}
                         </span>
                       </div>
-                      <p className="text-[10px] text-amber-700/70 dark:text-amber-300/70 leading-relaxed">
+                      <p className="text-xs text-amber-700/80 dark:text-amber-300/80 leading-relaxed">
                         {t("loanZakatDesc")}
                       </p>
                       <div className="flex items-center justify-between pt-1 border-t border-amber-500/20">
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-xs text-foreground/80">
                           {lang === "bn" ? "ঋণের যাকাত" : "Loan Zakat"}
                         </span>
-                        <span className="text-xs font-bold tabular-nums text-amber-700 dark:text-amber-400">
+                        <span className="text-sm font-bold tabular-nums text-amber-700 dark:text-amber-400">
                           {formatBDT(result.loanZakat, lang)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-xs text-foreground/80">
                           {lang === "bn" ? "সম্পদের যাকাত" : "Asset Zakat"}
                         </span>
-                        <span className="text-xs font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+                        <span className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
                           {formatBDT(result.zakatPayable, lang)}
                         </span>
                       </div>
@@ -427,7 +427,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                     <p className="text-2xl sm:text-3xl font-black tabular-nums text-amber-600 dark:text-amber-400 tracking-tight">
                       {formatBDT(result.loanZakat, lang)}
                     </p>
-                    <p className="text-[10px] text-amber-700/70 dark:text-amber-300/70 leading-relaxed max-w-xs mx-auto">
+                    <p className="text-xs text-amber-700/80 dark:text-amber-300/80 leading-relaxed max-w-xs mx-auto">
                       {t("loanZakatDesc")}
                     </p>
                   </div>
@@ -440,17 +440,17 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
           {!hasAnyAssets && (
             <div className="py-10 text-center space-y-3">
               <div className="flex justify-center">
-                <div className="flex h-14 w-14 items-center justify-center bg-muted/50">
-                  <Calculator className="size-6 text-muted-foreground/40" />
+                <div className="flex h-14 w-14 items-center justify-center bg-muted/60">
+                  <Calculator className="size-6 text-muted-foreground/70" />
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-foreground/70">
+                <h3 className="text-base font-semibold text-foreground/90">
                   {lang === "bn"
                     ? "আপনার সম্পদের তথ্য দিন"
                     : "Enter your asset details"}
                 </h3>
-                <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
+                <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
                   {lang === "bn"
                     ? "বাম পাশের ফর্মে আপনার সম্পদ ও দায়ের তথ্য পূরণ করলে এখানে যাকাতের হিসাব দেখা যাবে।"
                     : "Fill in your assets and liabilities in the form to see your Zakat calculation here."}
@@ -464,10 +464,10 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
             <>
               <IslamicDivider />
               <blockquote className="text-center px-4 py-2 space-y-1">
-                <p className="text-xs italic text-muted-foreground leading-relaxed">
+                <p className="text-sm italic text-muted-foreground leading-relaxed">
                   {t("quranVerse")}
                 </p>
-                <cite className="text-[10px] text-muted-foreground/60 not-italic block">
+                <cite className="text-xs text-muted-foreground not-italic block">
                   {t("quranRef")}
                 </cite>
               </blockquote>
@@ -479,10 +479,10 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
         {hasAnyAssets && (
           <CardFooter className="print:flex hidden border-t flex-col gap-2 py-4">
             <IslamicDivider />
-            <p className="text-[10px] text-muted-foreground text-center leading-relaxed max-w-lg">
+            <p className="text-xs text-muted-foreground text-center leading-relaxed max-w-lg">
               {t("printFooter")}
             </p>
-            <p className="text-[10px] text-muted-foreground/60">
+            <p className="text-xs text-muted-foreground">
               {t("generatedOn")}: {getFormattedDate(lang)}
             </p>
           </CardFooter>
@@ -491,13 +491,13 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
 
       {/* ─── Nisab Info Note (screen only) ──────────────────────────────── */}
       {hasAnyAssets && (
-        <div className="flex items-start gap-2.5 border border-dashed border-border/50 bg-muted/20 px-3.5 py-3 print:hidden">
-          <Info className="size-3.5 text-muted-foreground/50 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-2.5 border border-dashed border-border/70 bg-muted/30 px-3.5 py-3 print:hidden">
+          <Info className="size-4 text-muted-foreground mt-0.5 shrink-0" />
           <div>
-            <p className="text-[11px] font-medium text-foreground/70 mb-0.5">
+            <p className="text-xs font-semibold text-foreground/90 mb-0.5">
               {t("note")}
             </p>
-            <p className="text-[10px] leading-relaxed text-muted-foreground/70">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               {t("nisabNote")}
             </p>
           </div>
@@ -538,18 +538,18 @@ function SummaryRow({
       )}
     >
       <div className="flex items-center gap-2 min-w-0">
-        <Icon className={cn("size-3.5 shrink-0", iconClass)} />
+        <Icon className={cn("size-4 shrink-0", iconClass)} />
         <div className="min-w-0">
           <span
             className={cn(
-              "text-xs truncate block",
-              isBold ? "font-semibold text-foreground" : "text-muted-foreground"
+              "text-sm truncate block",
+              isBold ? "font-semibold text-foreground" : "text-foreground/80"
             )}
           >
             {label}
           </span>
           {hint && (
-            <span className="text-[10px] text-muted-foreground/50 block">
+            <span className="text-xs text-muted-foreground block">
               {hint}
             </span>
           )}
@@ -558,7 +558,7 @@ function SummaryRow({
       <span
         className={cn(
           "tabular-nums shrink-0 text-right",
-          isLarge ? "text-base font-black" : "text-xs",
+          isLarge ? "text-lg font-black" : "text-sm",
           isBold && !isLarge && "font-bold",
           valueClass || "text-foreground"
         )}

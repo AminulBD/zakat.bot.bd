@@ -210,7 +210,7 @@ export function IslamicArch({
         viewBox="0 0 120 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="text-primary/30"
+        className="text-primary/50"
       >
         {/* Pointed arch shape */}
         <path
@@ -229,13 +229,13 @@ export function IslamicArch({
         <polygon
           points="60,18 62,22 66,22 63,25 64,29 60,27 56,29 57,25 54,22 58,22"
           fill="currentColor"
-          opacity="0.6"
+          opacity="0.8"
         />
         {/* Small dots along the arch */}
-        <circle cx="30" cy="24" r="1.2" fill="currentColor" opacity="0.4" />
-        <circle cx="44" cy="16" r="1.2" fill="currentColor" opacity="0.4" />
-        <circle cx="76" cy="16" r="1.2" fill="currentColor" opacity="0.4" />
-        <circle cx="90" cy="24" r="1.2" fill="currentColor" opacity="0.4" />
+        <circle cx="30" cy="24" r="1.2" fill="currentColor" opacity="0.6" />
+        <circle cx="44" cy="16" r="1.2" fill="currentColor" opacity="0.6" />
+        <circle cx="76" cy="16" r="1.2" fill="currentColor" opacity="0.6" />
+        <circle cx="90" cy="24" r="1.2" fill="currentColor" opacity="0.6" />
       </svg>
     </div>
   );
@@ -251,14 +251,14 @@ export function IslamicDivider({
 }) {
   return (
     <div className={cn("flex items-center justify-center gap-3 py-2", className)} aria-hidden="true">
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
       <svg
         width="24"
         height="24"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 text-primary/40"
+        className="shrink-0 text-primary/60"
       >
         {/* Small 8-pointed star */}
         <polygon
@@ -267,7 +267,7 @@ export function IslamicDivider({
           transform="scale(0.8) translate(3, 3)"
         />
       </svg>
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
     </div>
   );
 }
@@ -296,13 +296,13 @@ export function MosqueIcon({
       <path
         d="M22,36 Q22,16 32,10 Q42,16 42,36"
         fill="currentColor"
-        opacity="0.2"
+        opacity="0.3"
         stroke="currentColor"
         strokeWidth="1.5"
       />
       {/* Crescent on top */}
       <circle cx="32" cy="8" r="3" fill="none" stroke="currentColor" strokeWidth="1.2" />
-      <circle cx="33.5" cy="7.5" r="2.5" fill="currentColor" opacity="0.15" stroke="none" />
+      <circle cx="33.5" cy="7.5" r="2.5" fill="currentColor" opacity="0.25" stroke="none" />
       <path
         d="M33,5 Q30.5,7 33,11"
         fill="none"
@@ -310,18 +310,18 @@ export function MosqueIcon({
         strokeWidth="1"
       />
       {/* Left minaret */}
-      <rect x="12" y="22" width="6" height="20" rx="1" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1" />
-      <path d="M12,22 Q15,16 18,22" fill="currentColor" opacity="0.2" stroke="currentColor" strokeWidth="1" />
+      <rect x="12" y="22" width="6" height="20" rx="1" fill="currentColor" opacity="0.25" stroke="currentColor" strokeWidth="1" />
+      <path d="M12,22 Q15,16 18,22" fill="currentColor" opacity="0.3" stroke="currentColor" strokeWidth="1" />
       {/* Right minaret */}
-      <rect x="46" y="22" width="6" height="20" rx="1" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1" />
-      <path d="M46,22 Q49,16 52,22" fill="currentColor" opacity="0.2" stroke="currentColor" strokeWidth="1" />
+      <rect x="46" y="22" width="6" height="20" rx="1" fill="currentColor" opacity="0.25" stroke="currentColor" strokeWidth="1" />
+      <path d="M46,22 Q49,16 52,22" fill="currentColor" opacity="0.3" stroke="currentColor" strokeWidth="1" />
       {/* Base */}
-      <rect x="10" y="42" width="44" height="4" rx="1" fill="currentColor" opacity="0.3" stroke="currentColor" strokeWidth="1" />
+      <rect x="10" y="42" width="44" height="4" rx="1" fill="currentColor" opacity="0.4" stroke="currentColor" strokeWidth="1" />
       {/* Door arch */}
       <path
         d="M28,46 L28,38 Q28,33 32,31 Q36,33 36,38 L36,46"
         fill="currentColor"
-        opacity="0.15"
+        opacity="0.25"
         stroke="currentColor"
         strokeWidth="1"
       />

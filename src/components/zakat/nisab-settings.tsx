@@ -65,10 +65,10 @@ export function NisabSettings({
             <Scale className="size-4" />
           </div>
           <div>
-            <CardTitle className="text-sm font-semibold leading-tight">
+            <CardTitle className="text-base font-semibold leading-tight">
               {t("nisabMethod")}
             </CardTitle>
-            <CardDescription className="text-[11px] leading-tight mt-0.5">
+            <CardDescription className="text-sm leading-tight mt-0.5">
               {lang === "bn"
                 ? "স্বর্ণ বা রৌপ্যের বাজার দর অনুযায়ী নিসাব নির্ধারণ করুন"
                 : "Set market prices and choose your Nisab standard"}
@@ -81,8 +81,8 @@ export function NisabSettings({
         {/* Market Prices Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-1">
-            <Coins className="size-3.5 text-muted-foreground/60" />
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            <Coins className="size-4 text-muted-foreground" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {lang === "bn" ? "বর্তমান বাজার দর" : "Current Market Prices"}
             </span>
           </div>
@@ -104,7 +104,7 @@ export function NisabSettings({
                 href="https://www.bajus.org/gold-price"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-primary/70 hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 mt-1.5 text-xs text-primary/90 hover:text-primary font-medium transition-colors"
               >
                 <ExternalLink className="size-3" />
                 {lang === "bn" ? "সর্বশেষ দাম দেখুন" : "See latest price"}
@@ -132,8 +132,8 @@ export function NisabSettings({
         {/* Nisab Method Selection */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 mb-1">
-            <Scale className="size-3.5 text-muted-foreground/60" />
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            <Scale className="size-4 text-muted-foreground" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {lang === "bn" ? "নিসাব পদ্ধতি নির্বাচন" : "Select Nisab Standard"}
             </span>
           </div>
@@ -168,21 +168,21 @@ export function NisabSettings({
         </div>
 
         {/* Nisab Summary */}
-        <div className="border border-dashed border-primary/20 bg-primary/[0.02] px-3.5 py-3 dark:bg-primary/[0.05]">
+        <div className="border border-dashed border-primary/30 bg-primary/[0.04] px-3.5 py-3 dark:bg-primary/[0.08]">
           <div className="flex items-start gap-2.5">
-            <CircleAlert className="size-4 text-primary/50 mt-0.5 shrink-0" />
+            <CircleAlert className="size-4 text-primary/80 mt-0.5 shrink-0" />
             <div className="space-y-1.5">
-              <p className="text-[11px] font-medium text-foreground/80">
+              <p className="text-xs font-semibold text-foreground">
                 {t("nisabThreshold")}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-xs text-foreground/80">
                     {t("nisabGold")}:
                   </span>
                   <span
                     className={cn(
-                      "text-xs font-semibold tabular-nums",
+                      "text-sm font-bold tabular-nums",
                       nisabMethod === "gold"
                         ? "text-primary"
                         : "text-muted-foreground"
@@ -192,12 +192,12 @@ export function NisabSettings({
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-xs text-foreground/80">
                     {t("nisabSilver")}:
                   </span>
                   <span
                     className={cn(
-                      "text-xs font-semibold tabular-nums",
+                      "text-sm font-bold tabular-nums",
                       nisabMethod === "silver"
                         ? "text-primary"
                         : "text-muted-foreground"
@@ -207,15 +207,15 @@ export function NisabSettings({
                   </span>
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-primary/10">
-                <span className="text-[10px] text-muted-foreground/60">
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-primary/20">
+                <span className="text-xs text-muted-foreground">
                   {lang === "bn" ? "মেকিং চার্জ কর্তন" : "Making charge deduction"}
                 </span>
-                <span className="text-[10px] font-medium text-muted-foreground/60">
+                <span className="text-xs font-medium text-muted-foreground">
                   {Math.round(rate * 100)}%
                 </span>
               </div>
-              <p className="text-[10px] leading-snug text-muted-foreground/60 pt-1 border-t border-primary/10">
+              <p className="text-xs leading-snug text-muted-foreground pt-1 border-t border-primary/20">
                 {t("nisabNote")}
               </p>
             </div>
@@ -285,14 +285,14 @@ function MakingChargeInput({ value, onChange, lang }: MakingChargeInputProps) {
     <div className="space-y-1.5">
       <Label
         htmlFor="making-charge-rate"
-        className="text-xs font-medium text-foreground/80"
+        className="text-sm font-medium text-foreground"
       >
         {lang === "bn" ? "মেকিং চার্জ" : "Making Charge"}
       </Label>
       <div className="relative">
         <span
           className={cn(
-            "pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/60",
+            "pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground",
           )}
         >
           <Percent className="size-3.5" />
@@ -313,11 +313,11 @@ function MakingChargeInput({ value, onChange, lang }: MakingChargeInputProps) {
           )}
           autoComplete="off"
         />
-        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 select-none">
+        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none">
           %
         </span>
       </div>
-      <p className="text-[11px] leading-tight text-muted-foreground/60">
+      <p className="text-xs leading-tight text-muted-foreground">
         {lang === "bn"
           ? "বাংলাদেশে স্বর্ণ/রৌপ্যের মেকিং চার্জ সাধারণত ~১৭%। নিসাব থেকে কর্তন হবে।"
           : "In Bangladesh, jewelry making charge is typically ~17%. Deducted from nisab threshold."}
@@ -383,12 +383,12 @@ function NisabMethodOption({
         <span className="text-lg leading-none" aria-hidden="true">
           {iconEmoji}
         </span>
-        <span className="text-xs font-semibold text-foreground">
+        <span className="text-sm font-semibold text-foreground">
           {label}
         </span>
       </div>
 
-      <span className="text-[11px] text-muted-foreground leading-tight">
+      <span className="text-xs text-muted-foreground leading-snug">
         {description}
       </span>
 
@@ -403,8 +403,8 @@ function NisabMethodOption({
         >
           <span
             className={cn(
-              "text-xs font-bold tabular-nums",
-              isSelected ? "text-primary" : "text-muted-foreground"
+              "text-sm font-bold tabular-nums",
+              isSelected ? "text-primary" : "text-foreground/70"
             )}
           >
             {formatBDT(nisabValue, lang)}

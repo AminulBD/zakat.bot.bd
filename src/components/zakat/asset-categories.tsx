@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { Switch } from "@/components/ui/switch";
 import { CurrencyInput } from "@/components/zakat/currency-input";
 import { useI18n } from "@/lib/i18n";
@@ -97,9 +97,9 @@ function CategoryCard({
     <Card
       className={cn(
         "relative overflow-hidden transition-all duration-200",
-        "hover:ring-primary/20 hover:ring-2",
-        subtotal > 0 && !isLiability && "ring-1 ring-primary/15",
-        subtotal > 0 && isLiability && "ring-1 ring-destructive/15",
+        "hover:ring-primary/30 hover:ring-2",
+        subtotal > 0 && !isLiability && "ring-1 ring-primary/25",
+        subtotal > 0 && isLiability && "ring-1 ring-destructive/25",
         className
       )}
     >
@@ -123,17 +123,17 @@ function CategoryCard({
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center",
                 isLiability
-                  ? "bg-destructive/10 text-destructive dark:bg-destructive/20"
-                  : "bg-primary/10 text-primary dark:bg-primary/20"
+                  ? "bg-destructive/15 text-destructive dark:bg-destructive/25"
+                  : "bg-primary/15 text-primary dark:bg-primary/25"
               )}
             >
               <Icon className="size-4" />
             </div>
             <div>
-              <CardTitle className="text-sm font-semibold leading-tight">
+              <CardTitle className="text-base font-semibold leading-tight">
                 {title}
               </CardTitle>
-              <CardDescription className="text-[11px] leading-tight mt-0.5">
+              <CardDescription className="text-sm leading-tight mt-0.5">
                 {description}
               </CardDescription>
             </div>
@@ -142,7 +142,7 @@ function CategoryCard({
           {subtotal > 0 && (
             <Badge
               variant={isLiability ? "destructive" : "default"}
-              className="tabular-nums text-[11px] shrink-0 h-5 font-semibold"
+              className="tabular-nums text-xs shrink-0 h-5 font-semibold"
             >
               {isLiability ? "−" : ""}
               {formatBDT(subtotal, lang)}
@@ -261,10 +261,10 @@ function AddItemButton({ label, suggestions, onAdd, isLiability = false }: AddIt
         size="sm"
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
-          "w-full gap-1.5 border-dashed text-[11px]",
+          "w-full gap-1.5 border-dashed text-xs",
           isLiability
-            ? "border-destructive/20 text-destructive/70 hover:text-destructive hover:border-destructive/40 hover:bg-destructive/5"
-            : "border-primary/20 text-primary/70 hover:text-primary hover:border-primary/40 hover:bg-primary/5"
+            ? "border-destructive/30 text-destructive/90 hover:text-destructive hover:border-destructive/50 hover:bg-destructive/5"
+            : "border-primary/30 text-primary/90 hover:text-primary hover:border-primary/50 hover:bg-primary/5"
         )}
       >
         <Plus className="size-3.5" />
@@ -290,7 +290,7 @@ function AddItemButton({ label, suggestions, onAdd, isLiability = false }: AddIt
                 variant="default"
                 size="xs"
                 onClick={() => handleAdd(customValue.trim())}
-                className="mt-1.5 w-full text-[11px]"
+                className="mt-1.5 w-full text-xs"
               >
                 <Plus className="size-3" />
                 {t("addItem")}: "{customValue.trim()}"
@@ -302,7 +302,7 @@ function AddItemButton({ label, suggestions, onAdd, isLiability = false }: AddIt
           {suggestions.length > 0 && (
             <>
               <div className="mb-1.5 px-1">
-                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t("suggestedItems")}
                 </span>
               </div>
@@ -312,9 +312,9 @@ function AddItemButton({ label, suggestions, onAdd, isLiability = false }: AddIt
                     key={s.key}
                     type="button"
                     onClick={() => handleAdd(lang === "bn" ? s.bn : s.en)}
-                    className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                    className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-sm text-foreground/90 transition-colors hover:bg-muted hover:text-foreground"
                   >
-                    <Plus className="size-3 text-muted-foreground/50 shrink-0" />
+                    <Plus className="size-3.5 text-muted-foreground shrink-0" />
                     {lang === "bn" ? s.bn : s.en}
                   </button>
                 ))}
@@ -382,7 +382,7 @@ function EditableLabel({ value, onChange, className }: EditableLabelProps) {
         onChange={(e) => setDraft(e.target.value)}
         onBlur={handleCommit}
         onKeyDown={handleKeyDown}
-        className={cn("h-6 text-[11px] px-1.5 py-0.5 w-full min-w-0", className)}
+        className={cn("h-7 text-xs px-1.5 py-0.5 w-full min-w-0", className)}
       />
     );
   }
@@ -397,10 +397,10 @@ function EditableLabel({ value, onChange, className }: EditableLabelProps) {
       )}
       title={t("itemName")}
     >
-      <span className="text-[11px] font-medium text-foreground/80 truncate leading-tight">
+      <span className="text-xs font-medium text-foreground truncate leading-tight">
         {value}
       </span>
-      <Pencil className="size-2.5 shrink-0 text-muted-foreground/0 group-hover/label:text-muted-foreground/50 transition-colors" />
+      <Pencil className="size-2.5 shrink-0 text-muted-foreground/0 group-hover/label:text-muted-foreground/70 transition-colors" />
     </button>
   );
 }
@@ -427,10 +427,10 @@ function EntryRow({
   const { t } = useI18n();
 
   return (
-    <div className="group/row relative border border-border/50 bg-muted/10 p-3 transition-colors hover:border-border/80 dark:bg-muted/5">
+    <div className="group/row relative border border-border/60 bg-muted/15 p-3 transition-colors hover:border-border dark:bg-muted/10">
       {/* Row header: editable label + remove button */}
       <div className="flex items-center gap-2 mb-2">
-        <GripVertical className="size-3 text-muted-foreground/30 shrink-0 hidden sm:block" />
+        <GripVertical className="size-3 text-muted-foreground/50 shrink-0 hidden sm:block" />
         <EditableLabel
           value={entry.label}
           onChange={onLabelChange}
@@ -445,8 +445,8 @@ function EntryRow({
             className={cn(
               "shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity",
               isLiability
-                ? "text-destructive/50 hover:text-destructive hover:bg-destructive/10"
-                : "text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10"
+                ? "text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+                : "text-muted-foreground/70 hover:text-destructive hover:bg-destructive/10"
             )}
             title={t("removeItem")}
           >
@@ -471,6 +471,7 @@ function EntryRow({
 interface MetalEntryRowProps {
   entry: MetalEntry;
   pricePerGram: number;
+  makingChargeRate: number;
   onUpdate: (updates: Partial<Omit<MetalEntry, "id">>) => void;
   onRemove: () => void;
   canRemove: boolean;
@@ -479,18 +480,19 @@ interface MetalEntryRowProps {
 function MetalEntryRow({
   entry,
   pricePerGram,
+  makingChargeRate,
   onUpdate,
   onRemove,
   canRemove,
 }: MetalEntryRowProps) {
   const { t, lang } = useI18n();
-  const entryValue = metalEntryValue(entry, pricePerGram);
+  const entryValue = metalEntryValue(entry, pricePerGram, makingChargeRate);
 
   return (
-    <div className="group/row relative border border-border/50 bg-muted/10 p-3 transition-colors hover:border-border/80 dark:bg-muted/5">
+    <div className="group/row relative border border-border/60 bg-muted/15 p-3 transition-colors hover:border-border dark:bg-muted/10">
       {/* Row header: editable label + remove */}
       <div className="flex items-center gap-2 mb-2">
-        <GripVertical className="size-3 text-muted-foreground/30 shrink-0 hidden sm:block" />
+        <GripVertical className="size-3 text-muted-foreground/50 shrink-0 hidden sm:block" />
         <EditableLabel
           value={entry.label}
           onChange={(label) => onUpdate({ label })}
@@ -502,7 +504,7 @@ function MetalEntryRow({
             variant="ghost"
             size="icon-xs"
             onClick={onRemove}
-            className="shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10"
+            className="shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground/70 hover:text-destructive hover:bg-destructive/10"
             title={t("removeItem")}
           >
             <X className="size-3" />
@@ -510,22 +512,49 @@ function MetalEntryRow({
         )}
       </div>
 
-      {/* Toggle: weight vs direct value */}
-      <div className="flex items-center justify-between border border-dashed border-border/50 px-2.5 py-2 bg-muted/20 mb-2.5">
-        <Label
+      {/* Options row: "Enter value directly" + "Making charge" side by side */}
+      <div className="flex items-center border border-dashed border-border/60 bg-muted/30 mb-2.5 divide-x divide-border/60">
+        <label
           htmlFor={`metal-toggle-${entry.id}`}
-          className="text-[11px] text-muted-foreground cursor-pointer"
+          className="flex flex-1 items-center justify-between gap-2 px-2.5 py-1.5 cursor-pointer"
         >
-          {t("enterValueDirectly")}
-        </Label>
-        <Switch
-          id={`metal-toggle-${entry.id}`}
-          size="sm"
-          checked={entry.useManualValue}
-          onCheckedChange={(checked) => onUpdate({ useManualValue: !!checked })}
-        />
+          <span className="text-xs text-foreground/80">
+            {t("enterValueDirectly")}
+          </span>
+          <Switch
+            id={`metal-toggle-${entry.id}`}
+            size="sm"
+            checked={entry.useManualValue}
+            onCheckedChange={(checked) => onUpdate({ useManualValue: !!checked })}
+          />
+        </label>
+        {!entry.useManualValue && (
+          <label
+            htmlFor={`making-charge-toggle-${entry.id}`}
+            className={cn(
+              "flex flex-1 items-center justify-between gap-2 px-2.5 py-1.5 cursor-pointer",
+              entry.hasMakingCharge && "bg-primary/5"
+            )}
+          >
+            <span className={cn(
+              "text-xs",
+              entry.hasMakingCharge ? "text-foreground/80" : "text-muted-foreground"
+            )}>
+              {entry.hasMakingCharge
+                ? (lang === "bn" ? "মেকিং চার্জ" : "Making charge")
+                : (lang === "bn" ? "মেকিং নেই" : "No making charge")}
+            </span>
+            <Switch
+              id={`making-charge-toggle-${entry.id}`}
+              size="sm"
+              checked={entry.hasMakingCharge}
+              onCheckedChange={(checked) => onUpdate({ hasMakingCharge: !!checked })}
+            />
+          </label>
+        )}
       </div>
 
+      {/* Value input */}
       {entry.useManualValue ? (
         <CurrencyInput
           label=""
@@ -544,12 +573,19 @@ function MetalEntryRow({
             suffix={lang === "bn" ? "গ্রাম" : "grams"}
           />
           {entry.weightGrams > 0 && pricePerGram > 0 && (
-            <div className="flex items-center gap-2 bg-primary/5 px-2.5 py-1.5 dark:bg-primary/10">
-              <CircleDollarSign className="size-3 text-primary/60 shrink-0" />
-              <p className="text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-2 bg-primary/8 px-2.5 py-1.5 dark:bg-primary/15">
+              <CircleDollarSign className="size-3.5 text-primary shrink-0" />
+              <p className="text-xs text-foreground/80">
                 {entry.weightGrams}
                 {lang === "bn" ? " গ্রাম" : "g"} × {formatBDT(pricePerGram, lang)}/
-                {lang === "bn" ? "গ্রাম" : "g"} ={" "}
+                {lang === "bn" ? "গ্রাম" : "g"}
+                {entry.hasMakingCharge && makingChargeRate > 0 && (
+                  <span className="text-muted-foreground">
+                    {" "}− {Math.round(makingChargeRate * 100)}%{" "}
+                    {lang === "bn" ? "মেকিং চার্জ" : "making"}
+                  </span>
+                )}
+                {" "}={" "}
                 <span className="font-semibold text-primary">
                   {formatBDT(entryValue, lang)}
                 </span>
@@ -568,11 +604,11 @@ function EmptyState() {
   const { t } = useI18n();
   return (
     <div className="flex flex-col items-center justify-center py-6 text-center">
-      <div className="flex h-10 w-10 items-center justify-center bg-muted/50 mb-2">
-        <Plus className="size-4 text-muted-foreground/40" />
+      <div className="flex h-10 w-10 items-center justify-center bg-muted/60 mb-2">
+        <Plus className="size-4 text-muted-foreground/70" />
       </div>
-      <p className="text-xs font-medium text-muted-foreground/60">{t("noItems")}</p>
-      <p className="text-[10px] text-muted-foreground/40 mt-0.5">{t("noItemsHint")}</p>
+      <p className="text-sm font-medium text-muted-foreground">{t("noItems")}</p>
+      <p className="text-xs text-muted-foreground mt-0.5">{t("noItemsHint")}</p>
     </div>
   );
 }
@@ -646,12 +682,13 @@ export function CashCategory({ data, onChange }: CashCategoryProps) {
 interface GoldCategoryProps {
   data: GoldAssets;
   goldPrice: number;
+  makingChargeRate: number;
   onChange: (data: GoldAssets) => void;
 }
 
-export function GoldCategory({ data, goldPrice, onChange }: GoldCategoryProps) {
+export function GoldCategory({ data, goldPrice, makingChargeRate, onChange }: GoldCategoryProps) {
   const { t } = useI18n();
-  const subtotal = sumMetalEntries(data.entries, goldPrice);
+  const subtotal = sumMetalEntries(data.entries, goldPrice, makingChargeRate);
 
   const handleAdd = useCallback(
     (label: string) => {
@@ -690,13 +727,14 @@ export function GoldCategory({ data, goldPrice, onChange }: GoldCategoryProps) {
           key={entry.id}
           entry={entry}
           pricePerGram={goldPrice}
+          makingChargeRate={makingChargeRate}
           onUpdate={(updates) => handleUpdate(entry.id, updates)}
           onRemove={() => handleRemove(entry.id)}
           canRemove={data.entries.length > 1}
         />
       ))}
       {data.entries.length > 0 && (
-        <p className="text-[11px] text-muted-foreground/50 leading-tight px-1 pt-1">
+        <p className="text-xs text-muted-foreground leading-tight px-1 pt-1">
           {t("goldHint")}
         </p>
       )}
@@ -709,12 +747,13 @@ export function GoldCategory({ data, goldPrice, onChange }: GoldCategoryProps) {
 interface SilverCategoryProps {
   data: SilverAssets;
   silverPrice: number;
+  makingChargeRate: number;
   onChange: (data: SilverAssets) => void;
 }
 
-export function SilverCategory({ data, silverPrice, onChange }: SilverCategoryProps) {
+export function SilverCategory({ data, silverPrice, makingChargeRate, onChange }: SilverCategoryProps) {
   const { t } = useI18n();
-  const subtotal = sumMetalEntries(data.entries, silverPrice);
+  const subtotal = sumMetalEntries(data.entries, silverPrice, makingChargeRate);
 
   const handleAdd = useCallback(
     (label: string) => {
@@ -753,13 +792,14 @@ export function SilverCategory({ data, silverPrice, onChange }: SilverCategoryPr
           key={entry.id}
           entry={entry}
           pricePerGram={silverPrice}
+          makingChargeRate={makingChargeRate}
           onUpdate={(updates) => handleUpdate(entry.id, updates)}
           onRemove={() => handleRemove(entry.id)}
           canRemove={data.entries.length > 1}
         />
       ))}
       {data.entries.length > 0 && (
-        <p className="text-[11px] text-muted-foreground/50 leading-tight px-1 pt-1">
+        <p className="text-xs text-muted-foreground leading-tight px-1 pt-1">
           {t("silverHint")}
         </p>
       )}
@@ -916,10 +956,10 @@ function LoanEntryRow({
   const zakatOnThis = entry.amount * ZAKAT_RATE * entry.yearsOutstanding;
 
   return (
-    <div className="group/row relative border border-border/50 bg-muted/10 p-3 transition-colors hover:border-border/80 dark:bg-muted/5">
+    <div className="group/row relative border border-border/60 bg-muted/15 p-3 transition-colors hover:border-border dark:bg-muted/10">
       {/* Row header: editable label + remove button */}
       <div className="flex items-center gap-2 mb-2">
-        <GripVertical className="size-3 text-muted-foreground/30 shrink-0 hidden sm:block" />
+        <GripVertical className="size-3 text-muted-foreground/50 shrink-0 hidden sm:block" />
         <EditableLabel
           value={entry.label}
           onChange={(label) => onUpdate({ label })}
@@ -931,7 +971,7 @@ function LoanEntryRow({
             variant="ghost"
             size="icon-xs"
             onClick={onRemove}
-            className="shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10"
+            className="shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground/70 hover:text-destructive hover:bg-destructive/10"
             title={t("removeItem")}
           >
             <X className="size-3" />
@@ -963,9 +1003,9 @@ function LoanEntryRow({
 
       {/* Zakat preview for this loan */}
       {entry.amount > 0 && entry.yearsOutstanding > 0 && (
-        <div className="flex items-center gap-2 bg-amber-500/5 dark:bg-amber-500/10 px-2.5 py-1.5 mt-2.5 border border-dashed border-amber-500/20">
-          <HandCoins className="size-3 text-amber-600/60 dark:text-amber-400/60 shrink-0" />
-          <p className="text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-2 bg-amber-500/8 dark:bg-amber-500/15 px-2.5 py-1.5 mt-2.5 border border-dashed border-amber-500/30">
+          <HandCoins className="size-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <p className="text-xs text-foreground/80">
             {formatBDT(entry.amount, lang)} × 2.5% × {entry.yearsOutstanding}{" "}
             {lang === "bn" ? t("yearsSuffixPlural") : (entry.yearsOutstanding === 1 ? t("yearsSuffix") : t("yearsSuffixPlural"))} ={" "}
             <span className="font-semibold text-amber-700 dark:text-amber-400">
@@ -1020,9 +1060,9 @@ export function LoanGivenCategory({ data, onChange }: LoanGivenCategoryProps) {
       suggestions={LOAN_GIVEN_SUGGESTIONS}
     >
       {/* Hint about loan zakat rule */}
-      <div className="flex items-start gap-2 border border-dashed border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-2 mb-2">
-        <Clock className="size-3.5 text-amber-600/60 dark:text-amber-400/60 mt-0.5 shrink-0" />
-        <p className="text-[10px] leading-relaxed text-amber-800/70 dark:text-amber-200/70">
+      <div className="flex items-start gap-2 border border-dashed border-amber-500/30 bg-amber-500/8 dark:bg-amber-500/15 px-3 py-2 mb-2">
+        <Clock className="size-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+        <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-200">
           {t("loansGivenHint")}
         </p>
       </div>
@@ -1048,11 +1088,11 @@ export function LoanGivenCategory({ data, onChange }: LoanGivenCategoryProps) {
                 {t("loanZakatLabel")}
               </span>
             </div>
-            <span className="text-xs font-bold tabular-nums text-amber-700 dark:text-amber-400">
+            <span className="text-sm font-bold tabular-nums text-amber-700 dark:text-amber-400">
               {formatBDT(totalLoanZakat, lang)}
             </span>
           </div>
-          <p className="text-[10px] text-amber-700/60 dark:text-amber-300/60 mt-1">
+          <p className="text-xs text-amber-700/80 dark:text-amber-300/80 mt-1">
             {t("loanZakatDesc")}
           </p>
         </div>
