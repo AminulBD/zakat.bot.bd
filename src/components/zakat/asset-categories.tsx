@@ -11,6 +11,8 @@ import {
   formatBDT,
   sumEntries,
   sumMetalEntries,
+  sumLoanEntries,
+  calculateLoanZakat,
   metalEntryValue,
   addEntry,
   removeEntry,
@@ -19,13 +21,19 @@ import {
   addMetalEntry,
   removeMetalEntry,
   updateMetalEntry,
+  addLoanEntry,
+  removeLoanEntry,
+  updateLoanEntry,
+  ZAKAT_RATE,
   type Entry,
   type MetalEntry,
+  type LoanEntry,
   type CashAssets,
   type GoldAssets,
   type SilverAssets,
   type InvestmentAssets,
   type OtherAssets,
+  type LoanGivenAssets,
   type Liabilities,
   type CategoryPreset,
   CASH_SUGGESTIONS,
@@ -33,6 +41,7 @@ import {
   SILVER_SUGGESTIONS,
   INVESTMENT_SUGGESTIONS,
   OTHERS_SUGGESTIONS,
+  LOAN_GIVEN_SUGGESTIONS,
   LIABILITY_SUGGESTIONS,
 } from "@/lib/zakat";
 import { cn } from "@/lib/utils";
@@ -44,11 +53,13 @@ import {
   CircleDollarSign,
   Package,
   FileWarning,
+  HandCoins,
   Plus,
   X,
   GripVertical,
   ChevronDown,
   Pencil,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -886,6 +897,176 @@ export function OthersCategory({ data, onChange }: OthersCategoryProps) {
 
 // ─── Liabilities Category ────────────────────────────────────────────────────
 
+// ─── Loan Given Category ─────────────────────────────────────────────────────
+
+interface LoanEntryRowProps {
+  entry: LoanEntry;
+  onUpdate: (updates: Partial<Omit<LoanEntry, "id">>) => void;
+  onRemove: () => void;
+  canRemove: boolean;
+}
+
+function LoanEntryRow({
+  entry,
+  onUpdate,
+  onRemove,
+  canRemove,
+}: LoanEntryRowProps) {
+  const { t, lang } = useI18n();
+  const zakatOnThis = entry.amount * ZAKAT_RATE * entry.yearsOutstanding;
+
+  return (
+    <div className="group/row relative border border-border/50 bg-muted/10 p-3 transition-colors hover:border-border/80 dark:bg-muted/5">
+      {/* Row header: editable label + remove button */}
+      <div className="flex items-center gap-2 mb-2">
+        <GripVertical className="size-3 text-muted-foreground/30 shrink-0 hidden sm:block" />
+        <EditableLabel
+          value={entry.label}
+          onChange={(label) => onUpdate({ label })}
+          className="flex-1 min-w-0"
+        />
+        {canRemove && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            onClick={onRemove}
+            className="shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10"
+            title={t("removeItem")}
+          >
+            <X className="size-3" />
+          </Button>
+        )}
+      </div>
+
+      {/* Amount input */}
+      <CurrencyInput
+        label=""
+        value={entry.amount}
+        onChange={(v) => onUpdate({ amount: v })}
+        id={`loan-amount-${entry.id}`}
+      />
+
+      {/* Years outstanding input */}
+      <div className="mt-2.5">
+        <div className="flex items-center gap-2 mb-1.5">
+          <Clock className="size-3 text-muted-foreground/50" />
+          <Label className="text-[11px] text-muted-foreground font-medium">
+            {t("yearsOutstanding")}
+          </Label>
+        </div>
+        <CurrencyInput
+          label=""
+          value={entry.yearsOutstanding}
+          onChange={(v) => onUpdate({ yearsOutstanding: Math.max(1, Math.round(v)) })}
+          id={`loan-years-${entry.id}`}
+          isCurrency={false}
+          suffix={lang === "bn" ? t("yearsSuffixPlural") : (entry.yearsOutstanding === 1 ? t("yearsSuffix") : t("yearsSuffixPlural"))}
+        />
+      </div>
+
+      {/* Zakat preview for this loan */}
+      {entry.amount > 0 && entry.yearsOutstanding > 0 && (
+        <div className="flex items-center gap-2 bg-amber-500/5 dark:bg-amber-500/10 px-2.5 py-1.5 mt-2.5 border border-dashed border-amber-500/20">
+          <HandCoins className="size-3 text-amber-600/60 dark:text-amber-400/60 shrink-0" />
+          <p className="text-[11px] text-muted-foreground">
+            {formatBDT(entry.amount, lang)} × 2.5% × {entry.yearsOutstanding}{" "}
+            {lang === "bn" ? t("yearsSuffixPlural") : (entry.yearsOutstanding === 1 ? t("yearsSuffix") : t("yearsSuffixPlural"))} ={" "}
+            <span className="font-semibold text-amber-700 dark:text-amber-400">
+              {formatBDT(zakatOnThis, lang)}
+            </span>
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface LoanGivenCategoryProps {
+  data: LoanGivenAssets;
+  onChange: (data: LoanGivenAssets) => void;
+}
+
+export function LoanGivenCategory({ data, onChange }: LoanGivenCategoryProps) {
+  const { t, lang } = useI18n();
+  const subtotal = sumLoanEntries(data.entries);
+  const totalLoanZakat = calculateLoanZakat(data.entries);
+
+  const handleAdd = useCallback(
+    (label: string) => {
+      onChange({ entries: addLoanEntry(data.entries, label) });
+    },
+    [data, onChange]
+  );
+
+  const handleRemove = useCallback(
+    (id: string) => {
+      onChange({ entries: removeLoanEntry(data.entries, id) });
+    },
+    [data, onChange]
+  );
+
+  const handleUpdate = useCallback(
+    (id: string, updates: Partial<Omit<LoanEntry, "id">>) => {
+      onChange({ entries: updateLoanEntry(data.entries, id, updates) });
+    },
+    [data, onChange]
+  );
+
+  return (
+    <CategoryCard
+      icon={HandCoins}
+      title={t("loansGivenTitle")}
+      description={t("loansGivenDescription")}
+      subtotal={subtotal}
+      addLabel={t("addLoanItem")}
+      onAdd={handleAdd}
+      suggestions={LOAN_GIVEN_SUGGESTIONS}
+    >
+      {/* Hint about loan zakat rule */}
+      <div className="flex items-start gap-2 border border-dashed border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-2 mb-2">
+        <Clock className="size-3.5 text-amber-600/60 dark:text-amber-400/60 mt-0.5 shrink-0" />
+        <p className="text-[10px] leading-relaxed text-amber-800/70 dark:text-amber-200/70">
+          {t("loansGivenHint")}
+        </p>
+      </div>
+
+      {data.entries.length === 0 && <EmptyState />}
+      {data.entries.map((entry) => (
+        <LoanEntryRow
+          key={entry.id}
+          entry={entry}
+          onUpdate={(updates) => handleUpdate(entry.id, updates)}
+          onRemove={() => handleRemove(entry.id)}
+          canRemove={data.entries.length > 1}
+        />
+      ))}
+
+      {/* Total accumulated loan zakat */}
+      {totalLoanZakat > 0 && (
+        <div className="border border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-2.5 mt-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <HandCoins className="size-3.5 text-amber-600 dark:text-amber-400" />
+              <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                {t("loanZakatLabel")}
+              </span>
+            </div>
+            <span className="text-xs font-bold tabular-nums text-amber-700 dark:text-amber-400">
+              {formatBDT(totalLoanZakat, lang)}
+            </span>
+          </div>
+          <p className="text-[10px] text-amber-700/60 dark:text-amber-300/60 mt-1">
+            {t("loanZakatDesc")}
+          </p>
+        </div>
+      )}
+    </CategoryCard>
+  );
+}
+
+// ─── Liabilities Category ────────────────────────────────────────────────────
+
 interface LiabilitiesCategoryProps {
   data: Liabilities;
   onChange: (data: Liabilities) => void;
@@ -958,5 +1139,6 @@ export {
   Landmark as SilverIcon,
   TrendingUp as InvestmentIcon,
   Package as OthersIcon,
+  HandCoins as LoanGivenIcon,
   FileWarning as LiabilitiesIcon,
 };

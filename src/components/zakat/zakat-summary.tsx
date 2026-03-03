@@ -36,6 +36,7 @@ import {
   Landmark,
   TrendingUp,
   Package,
+  HandCoins,
   FileWarning,
 } from "lucide-react";
 
@@ -54,6 +55,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   silver: Landmark,
   investments: TrendingUp,
   others: Package,
+  loansGiven: HandCoins,
   liabilities: FileWarning,
 };
 
@@ -66,6 +68,7 @@ function getCategoryLabel(key: string, lang: "en" | "bn"): string {
     silver: { en: "Silver", bn: "রৌপ্য" },
     investments: { en: "Investments", bn: "বিনিয়োগ" },
     others: { en: "Other Assets", bn: "অন্যান্য সম্পদ" },
+    loansGiven: { en: "Loans Given", bn: "প্রদত্ত ঋণ" },
     liabilities: { en: "Liabilities", bn: "দায়" },
   };
   return labels[key]?.[lang] ?? key;
@@ -84,6 +87,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
   }, []);
 
   const hasAnyAssets = result.totalAssets > 0;
+  const hasLoanZakat = result.loanZakat > 0;
 
   return (
     <div className={cn("space-y-4", className)} id="zakat-summary">
@@ -366,7 +370,7 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                     {t("zakatPayable")}
                   </p>
                   <p className="text-3xl sm:text-4xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 tracking-tight">
-                    {formatBDT(result.zakatPayable, lang)}
+                    {formatBDT(result.zakatPayable + result.loanZakat, lang)}
                   </p>
                   <Badge
                     variant="secondary"
@@ -376,6 +380,57 @@ export function ZakatSummary({ result, className }: ZakatSummaryProps) {
                       ? `${formatBDT(result.netAssets, lang)} × ${ZAKAT_RATE * 100}%`
                       : t("zakatRate")}
                   </Badge>
+
+                  {/* Loan Zakat Breakdown */}
+                  {hasLoanZakat && (
+                    <div className="mt-3 border border-dashed border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-2 text-left space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <HandCoins className="size-3 text-amber-600 dark:text-amber-400" />
+                        <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                          {t("loanZakatLabel")}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-amber-700/70 dark:text-amber-300/70 leading-relaxed">
+                        {t("loanZakatDesc")}
+                      </p>
+                      <div className="flex items-center justify-between pt-1 border-t border-amber-500/20">
+                        <span className="text-[11px] text-muted-foreground">
+                          {lang === "bn" ? "ঋণের যাকাত" : "Loan Zakat"}
+                        </span>
+                        <span className="text-xs font-bold tabular-nums text-amber-700 dark:text-amber-400">
+                          {formatBDT(result.loanZakat, lang)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground">
+                          {lang === "bn" ? "সম্পদের যাকাত" : "Asset Zakat"}
+                        </span>
+                        <span className="text-xs font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+                          {formatBDT(result.zakatPayable, lang)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Loan Zakat when regular zakat is NOT applicable */}
+              {!result.isZakatApplicable && hasLoanZakat && (
+                <div className="pt-2 space-y-1">
+                  <div className="border border-dashed border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-2.5 text-center space-y-2">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <HandCoins className="size-4 text-amber-600 dark:text-amber-400" />
+                      <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                        {t("loanZakatLabel")}
+                      </span>
+                    </div>
+                    <p className="text-2xl sm:text-3xl font-black tabular-nums text-amber-600 dark:text-amber-400 tracking-tight">
+                      {formatBDT(result.loanZakat, lang)}
+                    </p>
+                    <p className="text-[10px] text-amber-700/70 dark:text-amber-300/70 leading-relaxed max-w-xs mx-auto">
+                      {t("loanZakatDesc")}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

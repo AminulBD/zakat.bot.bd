@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   calculateZakat,
   createDefaultInput,
+  createDefaultLoansGiven,
   type ZakatInput,
   type ZakatResult,
   type CashAssets,
@@ -14,6 +15,7 @@ import {
   type SilverAssets,
   type InvestmentAssets,
   type OtherAssets,
+  type LoanGivenAssets,
   type Liabilities,
 } from "@/lib/zakat";
 import {
@@ -22,6 +24,7 @@ import {
   SilverCategory,
   InvestmentCategory,
   OthersCategory,
+  LoanGivenCategory,
   LiabilitiesCategory,
 } from "@/components/zakat/asset-categories";
 import { NisabSettings } from "@/components/zakat/nisab-settings";
@@ -37,6 +40,7 @@ import {
   Landmark,
   TrendingUp,
   Package,
+  HandCoins,
   FileWarning,
   TriangleAlert,
   Github,
@@ -64,6 +68,10 @@ function loadInputFromStorage(lang: "en" | "bn"): ZakatInput {
         typeof parsed.goldPricePerGram === "number" &&
         typeof parsed.silverPricePerGram === "number"
       ) {
+        // Backwards compatibility: add loansGiven if missing from old saved data
+        if (!parsed.loansGiven) {
+          parsed.loansGiven = createDefaultLoansGiven(lang);
+        }
         return parsed;
       }
     }
@@ -93,6 +101,7 @@ const ASSET_TABS = [
   { value: "silver", icon: Landmark },
   { value: "investments", icon: TrendingUp },
   { value: "others", icon: Package },
+  { value: "loansGiven", icon: HandCoins },
   { value: "liabilities", icon: FileWarning },
 ] as const;
 
@@ -103,6 +112,7 @@ function getTabLabel(value: string, lang: "en" | "bn"): string {
     silver: { en: "Silver", bn: "রৌপ্য" },
     investments: { en: "Invest", bn: "বিনিয়োগ" },
     others: { en: "Others", bn: "অন্যান্য" },
+    loansGiven: { en: "Loans", bn: "ঋণ" },
     liabilities: { en: "Debts", bn: "দায়" },
   };
   return labels[value]?.[lang] ?? value;
@@ -158,6 +168,10 @@ export function ZakatCalculator() {
   );
   const updateOthers = useCallback(
     (others: OtherAssets) => setInput((prev) => ({ ...prev, others })),
+    []
+  );
+  const updateLoansGiven = useCallback(
+    (loansGiven: LoanGivenAssets) => setInput((prev) => ({ ...prev, loansGiven })),
     []
   );
   const updateLiabilities = useCallback(
@@ -363,6 +377,10 @@ export function ZakatCalculator() {
 
               <TabsContent value="others">
                 <OthersCategory data={input.others} onChange={updateOthers} />
+              </TabsContent>
+
+              <TabsContent value="loansGiven">
+                <LoanGivenCategory data={input.loansGiven} onChange={updateLoansGiven} />
               </TabsContent>
 
               <TabsContent value="liabilities">
