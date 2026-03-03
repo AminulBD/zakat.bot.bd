@@ -396,17 +396,23 @@ export function ZakatCalculator() {
         <footer className="mt-12 mb-4 text-center print:hidden">
           <IslamicDivider />
           <blockquote className="mt-3 px-4">
-            <p className="text-xs italic text-muted-foreground/60 leading-relaxed max-w-lg mx-auto">
+            <p className="text-xs italic text-muted-foreground leading-relaxed max-w-lg mx-auto">
               {t("quranVerse")}
             </p>
-            <cite className="text-[10px] text-muted-foreground/40 not-italic block mt-1">
+            <cite className="text-[10px] text-muted-foreground not-italic block mt-1">
               {t("quranRef")}
             </cite>
           </blockquote>
-          <p className="text-[10px] text-muted-foreground/30 mt-4">
+          <p className="text-[10px] text-muted-foreground mt-4">
             {lang === "bn"
               ? "এই ক্যালকুলেটর শুধুমাত্র একটি সহায়ক টুল। বিস্তারিত বিধানের জন্য একজন আলেমের সাথে পরামর্শ করুন।"
               : "This calculator is a helper tool only. Please consult a scholar for detailed rulings."}
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            🔒{" "}
+            {lang === "bn"
+              ? "এই অ্যাপ আপনার কোনো তথ্য সংরক্ষণ করে না — সবকিছু আপনার ব্রাউজারেই থাকে।"
+              : "This app doesn't store your data — everything stays in your browser."}
           </p>
         </footer>
       </div>
