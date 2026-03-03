@@ -39,6 +39,7 @@ import {
   Package,
   FileWarning,
   TriangleAlert,
+  Github,
 } from "lucide-react";
 
 // ─── LocalStorage keys ───────────────────────────────────────────────────────
@@ -414,6 +415,15 @@ export function ZakatCalculator() {
               ? "এই অ্যাপ আপনার কোনো তথ্য সংরক্ষণ করে না — সবকিছু আপনার ব্রাউজারেই থাকে।"
               : "This app doesn't store your data — everything stays in your browser."}
           </p>
+          <a
+            href="https://github.com/AminulBD/zakat.bot.bd"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-[10px] hover:text-muted-foreground transition-colors mt-3"
+          >
+            <Github className="size-3" />
+            {lang === "bn" ? "সোর্স কোড" : "Source Code"}
+          </a>
         </footer>
       </div>
     </div>
